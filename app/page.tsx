@@ -34,6 +34,7 @@ export default function Home() {
   const [coordsB, setCoordsB] = useState<google.maps.LatLngLiteral | null>(null);
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [mapBounds, setMapBounds] = useState<google.maps.LatLngBounds | null>(null);
+  const [midpoint, setMidpoint] = useState<google.maps.LatLngLiteral | null>(null);
 
   const autocompleteA = useRef<google.maps.places.Autocomplete | null>(null);
   const autocompleteB = useRef<google.maps.places.Autocomplete | null>(null);
@@ -176,6 +177,31 @@ export default function Home() {
     }
   }, [map, coordsA, coordsB]);
 
+  // Calculate midpoint between two locations
+  const calculateMidpoint = () => {
+    if (coordsA && coordsB) {
+      // Simple midpoint calculation (more advanced calculations could be implemented)
+      const mid = {
+        lat: (coordsA.lat + coordsB.lat) / 2,
+        lng: (coordsA.lng + coordsB.lng) / 2
+      };
+      setMidpoint(mid);
+      
+      // Pan map to show all three markers
+      if (map) {
+        const bounds = new google.maps.LatLngBounds();
+        bounds.extend(coordsA);
+        bounds.extend(coordsB);
+        bounds.extend(mid);
+        map.fitBounds(bounds);
+        
+        // Add some padding
+        const padding = { top: 100, right: 50, bottom: 50, left: 350 };
+        map.fitBounds(bounds, padding);
+      }
+    }
+  };
+
   if (!isLoaded) return <div>Loading...</div>;
 
   return (
@@ -202,7 +228,7 @@ export default function Home() {
         </div>
         
         <div>
-          <label style={{ fontSize: "14px", fontWeight: "500", marginBottom: "4px", display: "block" }}>
+          <label style={{ fontSize: "14px", color: "#666", fontWeight: "500", marginBottom: "4px", display: "block" }}>
             First Location
           </label>
           <Autocomplete
@@ -231,7 +257,7 @@ export default function Home() {
         </div>
         
         <div>
-          <label style={{ fontSize: "14px", fontWeight: "500", marginBottom: "4px", display: "block" }}>
+          <label style={{ fontSize: "14px", fontWeight: "500", color: "#666", marginBottom: "4px", display: "block" }}>
             Second Location
           </label>
           <Autocomplete
@@ -258,6 +284,27 @@ export default function Home() {
             />
           </Autocomplete>
         </div>
+
+        {/* Calculate Midpoint Button */}
+        <button
+          onClick={calculateMidpoint}
+          disabled={!coordsA || !coordsB}
+          style={{
+            marginTop: "12px",
+            padding: "10px 16px",
+            backgroundColor: "#FF8C00", // Orange color
+            color: "white",
+            border: "none",
+            borderRadius: "4px",
+            fontWeight: "600",
+            fontSize: "16px",
+            cursor: coordsA && coordsB ? "pointer" : "not-allowed",
+            opacity: coordsA && coordsB ? 1 : 0.3,
+            transition: "opacity 0.2s ease-in-out",
+          }}
+        >
+          Calculate Midpoint
+        </button>
 
         {/* Debug info showing current map bounds */}
         {mapBounds && (
@@ -293,6 +340,21 @@ export default function Home() {
             position={coordsB} 
             title={locationB}
             label={{ text: "B", color: "white" }}
+          />
+        )}
+        {midpoint && (
+          <Marker 
+            position={midpoint}
+            title="Midpoint"
+            label={{ text: "M", color: "white" }}
+            icon={{
+              path: google.maps.SymbolPath.CIRCLE,
+              scale: 10,
+              fillColor: "#FF8C00",
+              fillOpacity: 1,
+              strokeColor: "#FFFFFF",
+              strokeWeight: 2,
+            }}
           />
         )}
       </GoogleMap>
