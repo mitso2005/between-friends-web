@@ -33,6 +33,7 @@ export default function Home() {
   const [coordsA, setCoordsA] = useState<google.maps.LatLngLiteral | null>(null);
   const [coordsB, setCoordsB] = useState<google.maps.LatLngLiteral | null>(null);
   const [map, setMap] = useState<google.maps.Map | null>(null);
+  const [mapBounds, setMapBounds] = useState<google.maps.LatLngBounds | null>(null);
 
   const autocompleteA = useRef<google.maps.places.Autocomplete | null>(null);
   const autocompleteB = useRef<google.maps.places.Autocomplete | null>(null);
@@ -41,15 +42,42 @@ export default function Home() {
   const inputARef = useRef<HTMLInputElement>(null);
   const inputBRef = useRef<HTMLInputElement>(null);
 
+  // Update autocomplete bias when map bounds change
+  const updateAutocompleteBias = (bounds: google.maps.LatLngBounds) => {
+    if (autocompleteA.current) {
+      autocompleteA.current.setBounds(bounds);
+    }
+    if (autocompleteB.current) {
+      autocompleteB.current.setBounds(bounds);
+    }
+  };
+
+  // Handle map bounds change
+  const onBoundsChanged = () => {
+    if (map) {
+      const bounds = map.getBounds();
+      if (bounds) {
+        setMapBounds(bounds);
+        updateAutocompleteBias(bounds);
+      }
+    }
+  };
+
   const onPlaceChangedA = () => {
     if (autocompleteA.current) {
       const place = autocompleteA.current.getPlace();
       if (place.geometry?.location) {
-        setCoordsA({
+        const newCoords = {
           lat: place.geometry.location.lat(),
           lng: place.geometry.location.lng(),
-        });
+        };
+        setCoordsA(newCoords);
         setLocationA(place.formatted_address || place.name || "");
+        
+        // Pan map to show the new location
+        if (map) {
+          map.panTo(newCoords);
+        }
       }
     }
   };
@@ -58,17 +86,58 @@ export default function Home() {
     if (autocompleteB.current) {
       const place = autocompleteB.current.getPlace();
       if (place.geometry?.location) {
-        setCoordsB({
+        const newCoords = {
           lat: place.geometry.location.lat(),
           lng: place.geometry.location.lng(),
-        });
+        };
+        setCoordsB(newCoords);
         setLocationB(place.formatted_address || place.name || "");
+        
+        // Pan map to show the new location
+        if (map) {
+          map.panTo(newCoords);
+        }
       }
     }
   };
   
   const onLoad = (mapInstance: google.maps.Map) => {
     setMap(mapInstance);
+    
+    // Set initial bounds for autocomplete
+    const bounds = mapInstance.getBounds();
+    if (bounds) {
+      setMapBounds(bounds);
+      updateAutocompleteBias(bounds);
+    }
+  };
+
+  const onAutocompleteLoadA = (ac: google.maps.places.Autocomplete) => {
+    autocompleteA.current = ac;
+    
+    // Set initial autocomplete options - no country restriction for global use
+    ac.setOptions({
+      fields: ["geometry", "formatted_address", "name"],
+      types: ["establishment", "geocode"], // Include businesses and addresses
+    });
+
+    // Apply current map bounds if available
+    if (mapBounds) {
+      ac.setBounds(mapBounds);
+    }
+  };
+
+  const onAutocompleteLoadB = (ac: google.maps.places.Autocomplete) => {
+    autocompleteB.current = ac;
+    
+    ac.setOptions({
+      fields: ["geometry", "formatted_address", "name"],
+      types: ["establishment", "geocode"],
+    });
+
+    if (mapBounds) {
+      ac.setBounds(mapBounds);
+    }
   };
 
   // Handle input changes without interfering with Autocomplete
@@ -93,6 +162,20 @@ export default function Home() {
     }
   }, [isLoaded]);
 
+  // Fit map to show both markers when both locations are selected
+  useEffect(() => {
+    if (map && coordsA && coordsB) {
+      const bounds = new google.maps.LatLngBounds();
+      bounds.extend(coordsA);
+      bounds.extend(coordsB);
+      map.fitBounds(bounds);
+      
+      // Add some padding
+      const padding = { top: 100, right: 50, bottom: 50, left: 350 }; // Extra left padding for input panel
+      map.fitBounds(bounds, padding);
+    }
+  }, [map, coordsA, coordsB]);
+
   if (!isLoaded) return <div>Loading...</div>;
 
   return (
@@ -114,11 +197,16 @@ export default function Home() {
           minWidth: "300px",
         }}
       >
+        <div style={{ fontSize: "12px", color: "#666", marginBottom: "8px" }}>
+          💡 Suggestions are based on the current map view (works worldwide)
+        </div>
+        
         <div>
+          <label style={{ fontSize: "14px", fontWeight: "500", marginBottom: "4px", display: "block" }}>
+            First Location
+          </label>
           <Autocomplete
-            onLoad={(ac) => {
-              autocompleteA.current = ac;
-            }}
+            onLoad={onAutocompleteLoadA}
             onPlaceChanged={onPlaceChangedA}
           >
             <input
@@ -135,6 +223,7 @@ export default function Home() {
                 width: "100%",
                 color: "#000",
                 backgroundColor: "#fff",
+                boxSizing: "border-box",
               }}
               id="location-input-a"
             />
@@ -142,10 +231,11 @@ export default function Home() {
         </div>
         
         <div>
+          <label style={{ fontSize: "14px", fontWeight: "500", marginBottom: "4px", display: "block" }}>
+            Second Location
+          </label>
           <Autocomplete
-            onLoad={(ac) => {
-              autocompleteB.current = ac;
-            }}
+            onLoad={onAutocompleteLoadB}
             onPlaceChanged={onPlaceChangedB}
           >
             <input
@@ -162,11 +252,19 @@ export default function Home() {
                 width: "100%",
                 color: "#000",
                 backgroundColor: "#fff",
+                boxSizing: "border-box",
               }}
               id="location-input-b"
             />
           </Autocomplete>
         </div>
+
+        {/* Debug info showing current map bounds */}
+        {mapBounds && (
+          <div style={{ fontSize: "10px", color: "#888", marginTop: "8px" }}>
+            Searching in: {mapBounds.getSouthWest().lat().toFixed(3)}, {mapBounds.getSouthWest().lng().toFixed(3)} to {mapBounds.getNorthEast().lat().toFixed(3)}, {mapBounds.getNorthEast().lng().toFixed(3)}
+          </div>
+        )}
       </div>
       
       {/* Map */}
@@ -181,9 +279,22 @@ export default function Home() {
           clickableIcons: false,
         }}
         onLoad={onLoad}
+        onBoundsChanged={onBoundsChanged}
       >
-        {coordsA && <Marker position={coordsA} />}
-        {coordsB && <Marker position={coordsB} />}
+        {coordsA && (
+          <Marker 
+            position={coordsA} 
+            title={locationA}
+            label={{ text: "A", color: "white" }}
+          />
+        )}
+        {coordsB && (
+          <Marker 
+            position={coordsB} 
+            title={locationB}
+            label={{ text: "B", color: "white" }}
+          />
+        )}
       </GoogleMap>
     </div>
   );
