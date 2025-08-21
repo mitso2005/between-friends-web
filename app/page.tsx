@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import {
   GoogleMap,
   useJsApiLoader,
@@ -36,6 +36,10 @@ export default function Home() {
 
   const autocompleteA = useRef<google.maps.places.Autocomplete | null>(null);
   const autocompleteB = useRef<google.maps.places.Autocomplete | null>(null);
+  
+  // Input refs to directly access the DOM elements
+  const inputARef = useRef<HTMLInputElement>(null);
+  const inputBRef = useRef<HTMLInputElement>(null);
 
   const onPlaceChangedA = () => {
     if (autocompleteA.current) {
@@ -67,13 +71,27 @@ export default function Home() {
     setMap(mapInstance);
   };
 
-  // Note for API key error:
-  // The "ApiTargetBlockedMapError" means your Google API key isn't properly configured.
-  // Fix steps in Google Cloud Console:
-  // 1. Enable both "Maps JavaScript API" and "Places API" (not "Places API (New)") 
-  // 2. Check API key restrictions - make sure both APIs are allowed
-  // 3. Ensure your domain/localhost is in the allowed referrers
-  // 4. Wait a few minutes for changes to propagate
+  // Handle input changes without interfering with Autocomplete
+  const handleInputAChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLocationA(e.target.value);
+  };
+
+  const handleInputBChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLocationB(e.target.value);
+  };
+
+  // Use effect to check if inputs are working properly
+  useEffect(() => {
+    if (inputARef.current) {
+      // Ensure the input is working properly
+      inputARef.current.style.color = '#000';
+      inputARef.current.style.backgroundColor = '#fff';
+    }
+    if (inputBRef.current) {
+      inputBRef.current.style.color = '#000';
+      inputBRef.current.style.backgroundColor = '#fff';
+    }
+  }, [isLoaded]);
 
   if (!isLoaded) return <div>Loading...</div>;
 
@@ -104,16 +122,19 @@ export default function Home() {
             onPlaceChanged={onPlaceChangedA}
           >
             <input
+              ref={inputARef}
               type="text"
               placeholder="Enter first location"
               value={locationA}
-              onChange={(e) => setLocationA(e.target.value)}
+              onChange={handleInputAChange}
               style={{
                 padding: "8px",
                 fontSize: "16px",
                 borderRadius: "4px",
                 border: "1px solid #ccc",
                 width: "100%",
+                color: "#000",
+                backgroundColor: "#fff",
               }}
               id="location-input-a"
             />
@@ -128,16 +149,19 @@ export default function Home() {
             onPlaceChanged={onPlaceChangedB}
           >
             <input
+              ref={inputBRef}
               type="text"
               placeholder="Enter second location"
               value={locationB}
-              onChange={(e) => setLocationB(e.target.value)}
+              onChange={handleInputBChange}
               style={{
                 padding: "8px",
                 fontSize: "16px",
                 borderRadius: "4px",
                 border: "1px solid #ccc",
                 width: "100%",
+                color: "#000",
+                backgroundColor: "#fff",
               }}
               id="location-input-b"
             />
