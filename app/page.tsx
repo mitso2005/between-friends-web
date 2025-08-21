@@ -1,22 +1,9 @@
 "use client";
 import React, { useRef, useState, useEffect } from "react";
-import {
-  GoogleMap,
-  useJsApiLoader,
-  Autocomplete,
-  Marker,
-  Libraries,
-} from "@react-google-maps/api";
-
-const containerStyle = {
-  width: "100vw",
-  height: "100vh",
-};
-
-const defaultCenter = {
-  lat: -37.8136,
-  lng: 144.9631,
-};
+import { useJsApiLoader, Libraries } from "@react-google-maps/api";
+import { TransportMode } from "../components/TransportModeSelector";
+import { MapView } from "../components/MapView";
+import { SearchPanel } from "../components/SearchPanel";
 
 // Define libraries array outside the component to prevent recreation on each render
 // This fixes the "Performance warning! LoadScript has been reloaded unintentionally!"
@@ -25,7 +12,7 @@ const libraries: Libraries = ["places"];
 export default function Home() {
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
-    libraries, // Use the libraries constant defined above
+    libraries,
   });
 
   const [locationA, setLocationA] = useState("");
@@ -35,13 +22,17 @@ export default function Home() {
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [mapBounds, setMapBounds] = useState<google.maps.LatLngBounds | null>(null);
   const [midpoint, setMidpoint] = useState<google.maps.LatLngLiteral | null>(null);
+  const [transportModeA, setTransportModeA] = useState<TransportMode>("DRIVING");
+  const [transportModeB, setTransportModeB] = useState<TransportMode>("DRIVING");
+  const [timeMidpoint, setTimeMidpoint] = useState<google.maps.LatLngLiteral | null>(null);
+  const [directionsA, setDirectionsA] = useState<google.maps.DirectionsResult | null>(null);
+  const [directionsB, setDirectionsB] = useState<google.maps.DirectionsResult | null>(null);
+  const [isCalculating, setIsCalculating] = useState(false);
+  const [calculationError, setCalculationError] = useState<string | null>(null);
+  const [apiKeyError, setApiKeyError] = useState<boolean>(false);
 
   const autocompleteA = useRef<google.maps.places.Autocomplete | null>(null);
   const autocompleteB = useRef<google.maps.places.Autocomplete | null>(null);
-  
-  // Input refs to directly access the DOM elements
-  const inputARef = useRef<HTMLInputElement>(null);
-  const inputBRef = useRef<HTMLInputElement>(null);
 
   // Update autocomplete bias when map bounds change
   const updateAutocompleteBias = (bounds: google.maps.LatLngBounds) => {
@@ -119,7 +110,7 @@ export default function Home() {
     // Set initial autocomplete options - no country restriction for global use
     ac.setOptions({
       fields: ["geometry", "formatted_address", "name"],
-      types: ["establishment", "geocode"], // Include businesses and addresses
+      types: ["establishment", "geocode"],
     });
 
     // Apply current map bounds if available
@@ -150,19 +141,6 @@ export default function Home() {
     setLocationB(e.target.value);
   };
 
-  // Use effect to check if inputs are working properly
-  useEffect(() => {
-    if (inputARef.current) {
-      // Ensure the input is working properly
-      inputARef.current.style.color = '#000';
-      inputARef.current.style.backgroundColor = '#fff';
-    }
-    if (inputBRef.current) {
-      inputBRef.current.style.color = '#000';
-      inputBRef.current.style.backgroundColor = '#fff';
-    }
-  }, [isLoaded]);
-
   // Fit map to show both markers when both locations are selected
   useEffect(() => {
     if (map && coordsA && coordsB) {
@@ -172,192 +150,319 @@ export default function Home() {
       map.fitBounds(bounds);
       
       // Add some padding
-      const padding = { top: 100, right: 50, bottom: 50, left: 350 }; // Extra left padding for input panel
+      const padding = { top: 100, right: 50, bottom: 50, left: 350 };
       map.fitBounds(bounds, padding);
     }
   }, [map, coordsA, coordsB]);
 
-  // Calculate midpoint between two locations
-  const calculateMidpoint = () => {
-    if (coordsA && coordsB) {
-      // Simple midpoint calculation (more advanced calculations could be implemented)
-      const mid = {
+  // Calculate time-based midpoint and routes with optimized algorithm
+  const calculateTimeMidpoint = async () => {
+    if (!coordsA || !coordsB) return;
+    
+    setIsCalculating(true);
+    setCalculationError(null);
+    setApiKeyError(false);
+    
+    try {
+      // First calculate distance-based midpoint as a starting point
+      const distanceMidpoint = {
         lat: (coordsA.lat + coordsB.lat) / 2,
         lng: (coordsA.lng + coordsB.lng) / 2
       };
-      setMidpoint(mid);
+      setMidpoint(distanceMidpoint); // Keep the distance midpoint for debugging
       
-      // Pan map to show all three markers
-      if (map) {
+      // Create directions service
+      const directionsService = new google.maps.DirectionsService();
+      
+      try {
+        // First test if the directions service works with our API key
+        await new Promise<google.maps.DirectionsResult>((resolve, reject) => {
+          directionsService.route(
+            {
+              origin: coordsA,
+              destination: distanceMidpoint,
+              travelMode: "DRIVING" as google.maps.TravelMode,
+            },
+            (result, status) => {
+              if (status === google.maps.DirectionsStatus.OK && result) {
+                resolve(result);
+              } else {
+                // If this fails with REQUEST_DENIED, it's likely an API key issue
+                if (status === "REQUEST_DENIED") {
+                  setApiKeyError(true);
+                  reject(new Error("API key not authorized for Directions API"));
+                } else {
+                  reject(status);
+                }
+              }
+            }
+          );
+        });
+      } catch (error: any) {
+        // If we hit an API key error, fall back to using the geographic midpoint
+        if (error.message === "API key not authorized for Directions API" || 
+            (typeof error === 'string' && error === "REQUEST_DENIED")) {
+          setApiKeyError(true);
+          // Use the geographic midpoint as fallback
+          setTimeMidpoint(distanceMidpoint);
+          return; // Exit early with the fallback solution
+        }
+        // For other errors, continue with the algorithm
+      }
+      
+      // If we get here, the API key works for directions
+
+      // Significantly reduced set of points to check (just 3 strategic points)
+      const potentialPoints: google.maps.LatLngLiteral[] = [
+        // Distance midpoint
+        distanceMidpoint,
+        // Point closer to A
+        {
+          lat: coordsA.lat * 0.75 + coordsB.lat * 0.25,
+          lng: coordsA.lng * 0.75 + coordsB.lng * 0.25
+        },
+        // Point closer to B
+        {
+          lat: coordsA.lat * 0.25 + coordsB.lat * 0.75,
+          lng: coordsA.lng * 0.25 + coordsB.lng * 0.75
+        }
+      ];
+      
+      let bestPoint = distanceMidpoint; // Default to distance midpoint
+      let bestTimeDiff = Infinity;
+      let routeA = null;
+      let routeB = null;
+      
+      // We only need to check a few points, not a whole grid
+      for (const point of potentialPoints) {
+        try {
+          // Get both routes in parallel to reduce wait time
+          const [resultA, resultB] = await Promise.all([
+            // Get route from A to point
+            new Promise<google.maps.DirectionsResult>((resolve, reject) => {
+              directionsService.route(
+                {
+                  origin: coordsA,
+                  destination: point,
+                  travelMode: transportModeA as google.maps.TravelMode,
+                  provideRouteAlternatives: false,
+                },
+                (result, status) => {
+                  if (status === google.maps.DirectionsStatus.OK && result) {
+                    resolve(result);
+                  } else {
+                    reject(status);
+                  }
+                }
+              );
+            }),
+            
+            // Get route from B to point
+            new Promise<google.maps.DirectionsResult>((resolve, reject) => {
+              directionsService.route(
+                {
+                  origin: coordsB,
+                  destination: point,
+                  travelMode: transportModeB as google.maps.TravelMode,
+                  provideRouteAlternatives: false,
+                },
+                (result, status) => {
+                  if (status === google.maps.DirectionsStatus.OK && result) {
+                    resolve(result);
+                  } else {
+                    reject(status);
+                  }
+                }
+              );
+            })
+          ]);
+          
+          // Get travel times in seconds
+          const timeA = resultA.routes[0].legs[0].duration?.value || 0;
+          const timeB = resultB.routes[0].legs[0].duration?.value || 0;
+          
+          // Calculate time difference
+          const timeDiff = Math.abs(timeA - timeB);
+          
+          // Update if this is the best point found so far
+          if (timeDiff < bestTimeDiff) {
+            bestTimeDiff = timeDiff;
+            bestPoint = point;
+            routeA = resultA;
+            routeB = resultB;
+          }
+          
+          // If we found a point with acceptable time difference (within 10%), stop searching
+          const maxTime = Math.max(timeA, timeB);
+          if (timeDiff / maxTime < 0.1) { // 10% margin of error
+            break; // This point is good enough
+          }
+        } catch (error) {
+          console.log("Error calculating route for point:", point, error);
+          // Continue with the next point
+        }
+      }
+      
+      // If we didn't find a good point, do a binary search between the best two points
+      if (bestTimeDiff > 0 && routeA && routeB) {
+        const timeA = routeA.routes[0].legs[0].duration?.value || 0;
+        const timeB = routeB.routes[0].legs[0].duration?.value || 0;
+        
+        // If time difference is significant, try one more point in between
+        if (Math.abs(timeA - timeB) / Math.max(timeA, timeB) > 0.2) { // 20% difference
+          // If A takes longer, move point closer to A
+          // If B takes longer, move point closer to B
+          const ratio = timeA > timeB ? 0.4 : 0.6; // Weigh toward the slower route
+          const midBetweenBestPoints = {
+            lat: coordsA.lat * ratio + coordsB.lat * (1 - ratio),
+            lng: coordsA.lng * ratio + coordsB.lng * (1 - ratio)
+          };
+          
+          try {
+            const [refinedResultA, refinedResultB] = await Promise.all([
+              new Promise<google.maps.DirectionsResult>((resolve, reject) => {
+                directionsService.route(
+                  {
+                    origin: coordsA,
+                    destination: midBetweenBestPoints,
+                    travelMode: transportModeA as google.maps.TravelMode,
+                  },
+                  (result, status) => {
+                    if (status === google.maps.DirectionsStatus.OK && result) {
+                      resolve(result);
+                    } else {
+                      reject(status);
+                    }
+                  }
+                );
+              }),
+              new Promise<google.maps.DirectionsResult>((resolve, reject) => {
+                directionsService.route(
+                  {
+                    origin: coordsB,
+                    destination: midBetweenBestPoints,
+                    travelMode: transportModeB as google.maps.TravelMode,
+                  },
+                  (result, status) => {
+                    if (status === google.maps.DirectionsStatus.OK && result) {
+                      resolve(result);
+                    } else {
+                      reject(status);
+                    }
+                  }
+                );
+              })
+            ]);
+            
+            const refinedTimeA = refinedResultA.routes[0].legs[0].duration?.value || 0;
+            const refinedTimeB = refinedResultB.routes[0].legs[0].duration?.value || 0;
+            const refinedTimeDiff = Math.abs(refinedTimeA - refinedTimeB);
+            
+            if (refinedTimeDiff < bestTimeDiff) {
+              bestPoint = midBetweenBestPoints;
+              bestTimeDiff = refinedTimeDiff;
+              routeA = refinedResultA;
+              routeB = refinedResultB;
+            }
+          } catch (error) {
+            console.log("Error in refining midpoint", error);
+          }
+        }
+      }
+      
+      // Set the results
+      setTimeMidpoint(bestPoint);
+      setDirectionsA(routeA);
+      setDirectionsB(routeB);
+      
+      // Fit map to show both routes
+      if (map && routeA && routeB) {
         const bounds = new google.maps.LatLngBounds();
-        bounds.extend(coordsA);
-        bounds.extend(coordsB);
-        bounds.extend(mid);
+        
+        // Add all points from both routes to the bounds
+        routeA.routes[0].overview_path.forEach((point) => bounds.extend(point));
+        routeB.routes[0].overview_path.forEach((point) => bounds.extend(point));
+        
         map.fitBounds(bounds);
         
         // Add some padding
         const padding = { top: 100, right: 50, bottom: 50, left: 350 };
         map.fitBounds(bounds, padding);
       }
+    } catch (error) {
+      console.error("Error calculating time midpoint:", error);
+      if (error === "REQUEST_DENIED" || (error as any)?.message?.includes("API key")) {
+        setApiKeyError(true);
+        setCalculationError("Your Google Maps API key is not authorized for the Directions Service. Using geographic midpoint instead.");
+        
+        // Fall back to the geographic midpoint
+        if (coordsA && coordsB) {
+          const fallbackMidpoint = {
+            lat: (coordsA.lat + coordsB.lat) / 2,
+            lng: (coordsA.lng + coordsB.lng) / 2
+          };
+          setTimeMidpoint(fallbackMidpoint);
+        }
+      } else {
+        setCalculationError("Error calculating meeting point. Please try again.");
+      }
+    } finally {
+      setIsCalculating(false);
     }
   };
 
-  if (!isLoaded) return <div>Loading...</div>;
+  // Don't automatically calculate midpoint when transport modes change
+  useEffect(() => {
+    // Disabled to prevent excessive API calls
+  }, [transportModeA, transportModeB]);
+
+  if (!isLoaded) return <div>Loading Maps API...</div>;
 
   return (
     <div style={{ position: "relative", width: "100vw", height: "100vh" }}>
-      {/* Input panel */}
-      <div
-        style={{
-          position: "absolute",
-          top: 24,
-          left: 24,
-          zIndex: 10,
-          background: "rgba(255,255,255,0.95)",
-          padding: "16px",
-          borderRadius: "8px",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-          display: "flex",
-          flexDirection: "column",
-          gap: "12px",
-          minWidth: "300px",
-        }}
-      >
-        <div style={{ fontSize: "12px", color: "#666", marginBottom: "8px" }}>
-          💡 Suggestions are based on the current map view (works worldwide)
-        </div>
-        
-        <div>
-          <label style={{ fontSize: "14px", color: "#666", fontWeight: "500", marginBottom: "4px", display: "block" }}>
-            First Location
-          </label>
-          <Autocomplete
-            onLoad={onAutocompleteLoadA}
-            onPlaceChanged={onPlaceChangedA}
-          >
-            <input
-              ref={inputARef}
-              type="text"
-              placeholder="Enter first location"
-              value={locationA}
-              onChange={handleInputAChange}
-              style={{
-                padding: "8px",
-                fontSize: "16px",
-                borderRadius: "4px",
-                border: "1px solid #ccc",
-                width: "100%",
-                color: "#000",
-                backgroundColor: "#fff",
-                boxSizing: "border-box",
-              }}
-              id="location-input-a"
-            />
-          </Autocomplete>
-        </div>
-        
-        <div>
-          <label style={{ fontSize: "14px", fontWeight: "500", color: "#666", marginBottom: "4px", display: "block" }}>
-            Second Location
-          </label>
-          <Autocomplete
-            onLoad={onAutocompleteLoadB}
-            onPlaceChanged={onPlaceChangedB}
-          >
-            <input
-              ref={inputBRef}
-              type="text"
-              placeholder="Enter second location"
-              value={locationB}
-              onChange={handleInputBChange}
-              style={{
-                padding: "8px",
-                fontSize: "16px",
-                borderRadius: "4px",
-                border: "1px solid #ccc",
-                width: "100%",
-                color: "#000",
-                backgroundColor: "#fff",
-                boxSizing: "border-box",
-              }}
-              id="location-input-b"
-            />
-          </Autocomplete>
-        </div>
-
-        {/* Calculate Midpoint Button */}
-        <button
-          onClick={calculateMidpoint}
-          disabled={!coordsA || !coordsB}
-          style={{
-            marginTop: "12px",
-            padding: "10px 16px",
-            backgroundColor: "#FF8C00", // Orange color
-            color: "white",
-            border: "none",
-            borderRadius: "4px",
-            fontWeight: "600",
-            fontSize: "16px",
-            cursor: coordsA && coordsB ? "pointer" : "not-allowed",
-            opacity: coordsA && coordsB ? 1 : 0.3,
-            transition: "opacity 0.2s ease-in-out",
-          }}
-        >
-          Calculate Midpoint
-        </button>
-
-        {/* Debug info showing current map bounds */}
-        {mapBounds && (
-          <div style={{ fontSize: "10px", color: "#888", marginTop: "8px" }}>
-            Searching in: {mapBounds.getSouthWest().lat().toFixed(3)}, {mapBounds.getSouthWest().lng().toFixed(3)} to {mapBounds.getNorthEast().lat().toFixed(3)}, {mapBounds.getNorthEast().lng().toFixed(3)}
-          </div>
-        )}
-      </div>
+      {/* Search Panel Component */}
+      <SearchPanel
+        locationA={locationA}
+        locationB={locationB}
+        handleInputAChange={handleInputAChange}
+        handleInputBChange={handleInputBChange}
+        onPlaceChangedA={onPlaceChangedA}
+        onPlaceChangedB={onPlaceChangedB}
+        onAutocompleteLoadA={onAutocompleteLoadA}
+        onAutocompleteLoadB={onAutocompleteLoadB}
+        coordsA={coordsA}
+        coordsB={coordsB}
+        transportModeA={transportModeA}
+        transportModeB={transportModeB}
+        setTransportModeA={setTransportModeA}
+        setTransportModeB={setTransportModeB}
+        apiKeyError={apiKeyError}
+        calculationError={calculationError}
+        isCalculating={isCalculating}
+        calculateTimeMidpoint={calculateTimeMidpoint}
+        directionsA={directionsA}
+        directionsB={directionsB}
+        timeMidpoint={timeMidpoint}
+        mapBounds={mapBounds}
+      />
       
-      {/* Map */}
-      <GoogleMap
-        mapContainerStyle={containerStyle}
-        center={coordsA || coordsB || defaultCenter}
-        zoom={coordsA || coordsB ? 12 : 10}
-        options={{
-          streetViewControl: false,
-          mapTypeControl: false,
-          fullscreenControl: false,
-          clickableIcons: false,
-        }}
+      {/* Map View Component */}
+      <MapView
+        isLoaded={isLoaded}
+        map={map}
+        setMap={setMap}
         onLoad={onLoad}
         onBoundsChanged={onBoundsChanged}
-      >
-        {coordsA && (
-          <Marker 
-            position={coordsA} 
-            title={locationA}
-            label={{ text: "A", color: "white" }}
-          />
-        )}
-        {coordsB && (
-          <Marker 
-            position={coordsB} 
-            title={locationB}
-            label={{ text: "B", color: "white" }}
-          />
-        )}
-        {midpoint && (
-          <Marker 
-            position={midpoint}
-            title="Midpoint"
-            label={{ text: "M", color: "white" }}
-            icon={{
-              path: google.maps.SymbolPath.CIRCLE,
-              scale: 10,
-              fillColor: "#FF8C00",
-              fillOpacity: 1,
-              strokeColor: "#FFFFFF",
-              strokeWeight: 2,
-            }}
-          />
-        )}
-      </GoogleMap>
+        coordsA={coordsA}
+        coordsB={coordsB}
+        locationA={locationA}
+        locationB={locationB}
+        midpoint={midpoint}
+        timeMidpoint={timeMidpoint}
+        directionsA={directionsA}
+        directionsB={directionsB}
+        apiKeyError={apiKeyError}
+      />
     </div>
   );
 }
