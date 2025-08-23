@@ -6,8 +6,8 @@ interface LocationInputProps {
   placeholder: string;
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onPlaceChanged: () => void;
   onAutocompleteLoad: (autocomplete: google.maps.places.Autocomplete) => void;
+  onPlaceChanged: () => void;
   id: string;
 }
 

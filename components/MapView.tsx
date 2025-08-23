@@ -1,6 +1,6 @@
 import React from 'react';
 import { GoogleMap, Marker, DirectionsRenderer } from '@react-google-maps/api';
-import { TransportMode } from './TransportModeSelector';
+import { useMapContext } from '../contexts/MapContext';
 
 const containerStyle = {
   width: "100vw",
@@ -14,35 +14,47 @@ const defaultCenter = {
 
 interface MapViewProps {
   isLoaded: boolean;
-  map: google.maps.Map | null;
-  setMap: (map: google.maps.Map | null) => void;
-  onLoad: (mapInstance: google.maps.Map) => void;
-  onBoundsChanged: () => void;
-  coordsA: google.maps.LatLngLiteral | null;
-  coordsB: google.maps.LatLngLiteral | null;
-  locationA: string;
-  locationB: string;
-  midpoint: google.maps.LatLngLiteral | null;
-  timeMidpoint: google.maps.LatLngLiteral | null;
-  directionsA: google.maps.DirectionsResult | null;
-  directionsB: google.maps.DirectionsResult | null;
-  apiKeyError: boolean;
 }
 
-export const MapView: React.FC<MapViewProps> = ({
-  isLoaded,
-  onLoad,
-  onBoundsChanged,
-  coordsA,
-  coordsB,
-  locationA,
-  locationB,
-  midpoint,
-  timeMidpoint,
-  directionsA,
-  directionsB,
-  apiKeyError,
-}) => {
+export const MapView: React.FC<MapViewProps> = ({ isLoaded }) => {
+  const { 
+    map, 
+    setMap, 
+    mapBounds, 
+    setMapBounds,
+    updateAutocompleteBias,
+    coordsA, 
+    coordsB, 
+    locationA,
+    locationB,
+    midpoint, 
+    timeMidpoint, 
+    directionsA, 
+    directionsB, 
+    apiKeyError 
+  } = useMapContext();
+  
+  const onLoad = (mapInstance: google.maps.Map) => {
+    setMap(mapInstance);
+    
+    // Set initial bounds for autocomplete
+    const bounds = mapInstance.getBounds();
+    if (bounds) {
+      setMapBounds(bounds);
+      updateAutocompleteBias(bounds);
+    }
+  };
+  
+  const onBoundsChanged = () => {
+    if (map) {
+      const bounds = map.getBounds();
+      if (bounds) {
+        setMapBounds(bounds);
+        updateAutocompleteBias(bounds);
+      }
+    }
+  };
+  
   if (!isLoaded) return <div>Loading Maps...</div>;
   
   return (

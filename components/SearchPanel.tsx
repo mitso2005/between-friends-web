@@ -1,58 +1,72 @@
 import React from 'react';
 import { LocationInput } from './LocationInput';
-import { TransportModeSelector, TransportMode } from './TransportModeSelector';
+import { TransportModeSelector } from './TransportModeSelector';
 import { RouteInfo } from './RouteInfo';
 import { ApiKeyError, ErrorMessage } from './ErrorMessage';
+import { useMapContext } from '../contexts/MapContext';
 
-interface SearchPanelProps {
-  locationA: string;
-  locationB: string;
-  handleInputAChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleInputBChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onPlaceChangedA: () => void;
-  onPlaceChangedB: () => void;
-  onAutocompleteLoadA: (autocomplete: google.maps.places.Autocomplete) => void;
-  onAutocompleteLoadB: (autocomplete: google.maps.places.Autocomplete) => void;
-  coordsA: google.maps.LatLngLiteral | null;
-  coordsB: google.maps.LatLngLiteral | null;
-  transportModeA: TransportMode;
-  transportModeB: TransportMode;
-  setTransportModeA: (mode: TransportMode) => void;
-  setTransportModeB: (mode: TransportMode) => void;
-  apiKeyError: boolean;
-  calculationError: string | null;
-  isCalculating: boolean;
-  calculateTimeMidpoint: () => void;
-  directionsA: google.maps.DirectionsResult | null;
-  directionsB: google.maps.DirectionsResult | null;
-  timeMidpoint: google.maps.LatLngLiteral | null;
-  mapBounds: google.maps.LatLngBounds | null;
-}
+export const SearchPanel: React.FC = () => {
+  const {
+    locationA,
+    locationB,
+    setLocationA,
+    setLocationB,
+    coordsA,
+    coordsB,
+    transportModeA,
+    transportModeB,
+    setTransportModeA,
+    setTransportModeB,
+    autocompleteA,
+    autocompleteB,
+    onPlaceChangedA,
+    onPlaceChangedB,
+    apiKeyError,
+    calculationError,
+    isCalculating,
+    calculateMeetingPoint,
+    directionsA,
+    directionsB,
+    timeMidpoint,
+    mapBounds,
+  } = useMapContext();
+  
+  const handleInputAChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLocationA(e.target.value);
+  };
 
-export const SearchPanel: React.FC<SearchPanelProps> = ({
-  locationA,
-  locationB,
-  handleInputAChange,
-  handleInputBChange,
-  onPlaceChangedA,
-  onPlaceChangedB,
-  onAutocompleteLoadA,
-  onAutocompleteLoadB,
-  coordsA,
-  coordsB,
-  transportModeA,
-  transportModeB,
-  setTransportModeA,
-  setTransportModeB,
-  apiKeyError,
-  calculationError,
-  isCalculating,
-  calculateTimeMidpoint,
-  directionsA,
-  directionsB,
-  timeMidpoint,
-  mapBounds,
-}) => {
+  const handleInputBChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLocationB(e.target.value);
+  };
+
+  const onAutocompleteLoadA = (ac: google.maps.places.Autocomplete) => {
+    autocompleteA.current = ac;
+    
+    // Set initial autocomplete options
+    ac.setOptions({
+      fields: ["geometry", "formatted_address", "name"],
+      types: ["establishment", "geocode"],
+    });
+
+    // Apply current map bounds if available
+    if (mapBounds) {
+      ac.setBounds(mapBounds);
+    }
+  };
+
+  const onAutocompleteLoadB = (ac: google.maps.places.Autocomplete) => {
+    autocompleteB.current = ac;
+    
+    ac.setOptions({
+      fields: ["geometry", "formatted_address", "name"],
+      types: ["establishment", "geocode"],
+    });
+
+    if (mapBounds) {
+      ac.setBounds(mapBounds);
+    }
+  };
+  
   return (
     <div
       style={{
@@ -85,7 +99,6 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({
         id="location-input-a"
       />
       
-      {/* Transport mode selector for location A */}
       {coordsA && (
         <TransportModeSelector 
           mode={transportModeA} 
@@ -104,7 +117,6 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({
         id="location-input-b"
       />
       
-      {/* Transport mode selector for location B */}
       {coordsB && (
         <TransportModeSelector 
           mode={transportModeB} 
@@ -113,17 +125,15 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({
         />
       )}
 
-      {/* API Key Error Message */}
       {apiKeyError && <ApiKeyError />}
       
-      {/* Calculate Midpoint Button */}
       <button
-        onClick={calculateTimeMidpoint}
+        onClick={calculateMeetingPoint}
         disabled={!coordsA || !coordsB || isCalculating}
         style={{
           marginTop: "12px",
           padding: "10px 16px",
-          backgroundColor: "#FF8C00", // Orange color
+          backgroundColor: "#FF8C00",
           color: "white",
           border: "none",
           borderRadius: "4px",
@@ -144,7 +154,6 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({
         <ErrorMessage message={calculationError} type="error" />
       )}
 
-      {/* Display route info if available */}
       {directionsA && directionsB && timeMidpoint && (
         <RouteInfo 
           directionsA={directionsA}
@@ -154,7 +163,6 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({
         />
       )}
 
-      {/* Debug info showing current map bounds */}
       {mapBounds && (
         <div style={{ fontSize: "10px", color: "#888", marginTop: "8px" }}>
           Searching in: {mapBounds.getSouthWest().lat().toFixed(3)}, {mapBounds.getSouthWest().lng().toFixed(3)} to {mapBounds.getNorthEast().lat().toFixed(3)}, {mapBounds.getNorthEast().lng().toFixed(3)}
