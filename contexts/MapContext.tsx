@@ -155,7 +155,7 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setMidpoint(distanceMidpoint);
     
     try {
-      // Calculate time-based midpoint
+      // Remove fairness preference parameter
       const result = await calculateTimeMidpoint(
         coordsA,
         coordsB,
@@ -226,6 +226,20 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         getRouteToPlace(coordsB, place.location, transportModeB),
       ]);
       
+      if (routeA && routeB) {
+        // Examine route times to see if they're fair
+        const timeA = routeA.routes[0].legs[0].duration?.value || 0;
+        const timeB = routeB.routes[0].legs[0].duration?.value || 0;
+        const timeDiff = Math.abs(timeA - timeB);
+        
+        // If times are very different, warn the user but still show the place
+        if (timeDiff > 300) { // More than 5 minutes difference
+          setCalculationError(`Note: Travel times to this place differ by ${Math.round(timeDiff/60)} minutes`);
+        } else {
+          setCalculationError(null);
+        }
+      }
+      
       setDirectionsA(routeA);
       setDirectionsB(routeB);
       
@@ -238,6 +252,7 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       }
     } catch (error) {
       console.error("Error getting routes to selected place:", error);
+      setCalculationError("Could not calculate routes to this place.");
     } finally {
       setIsCalculating(false);
     }

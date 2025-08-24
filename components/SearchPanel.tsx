@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { LocationInput } from './LocationInput';
 import { TransportModeSelector } from './TransportModeSelector';
+// Removed FairnessSelector import
 import { RouteInfo } from './RouteInfo';
 import { ApiKeyError, ErrorMessage } from './ErrorMessage';
 import { PlaceTypeSelector } from './PlaceTypeSelector';
@@ -38,6 +39,7 @@ export const SearchPanel: React.FC = () => {
     findRecommendedPlaces,
     selectPlace,
     selectedPlace,
+    // Removed timeFairnessPreference and setTimeFairnessPreference
   } = useMapContext();
 
   // Track if we're in recommendation mode
