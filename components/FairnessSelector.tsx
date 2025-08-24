@@ -13,33 +13,15 @@ export const FairnessSelector: React.FC<FairnessSelectorProps> = ({
 }) => {
   return (
     <div>
-      <label style={{ 
-        fontSize: "14px", 
-        fontWeight: "500", 
-        color: "#666", 
-        marginBottom: "4px", 
-        display: "block" 
-      }}>
+      <label className="text-sm font-medium text-gray-600 mb-1 block">
         Travel Time Fairness
       </label>
-      <div style={{ display: "flex", gap: "8px" }}>
+      <div className="flex gap-2">
         <button
           type="button"
           onClick={() => setPreference("relaxed")}
-          style={{
-            flex: 1,
-            padding: "6px",
-            backgroundColor: preference === "relaxed" ? "#e0e0e0" : "transparent",
-            border: "1px solid #ccc",
-            borderRadius: "4px",
-            fontSize: "12px",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "#333",
-            fontWeight: preference === "relaxed" ? "600" : "400",
-          }}
+          className={`flex-1 py-1.5 px-1.5 border border-gray-300 rounded text-xs cursor-pointer flex items-center justify-center text-gray-700 
+            ${preference === "relaxed" ? "bg-gray-200 font-semibold" : "bg-transparent font-normal"}`}
           aria-pressed={preference === "relaxed"}
         >
           Relaxed
@@ -47,20 +29,8 @@ export const FairnessSelector: React.FC<FairnessSelectorProps> = ({
         <button
           type="button"
           onClick={() => setPreference("balanced")}
-          style={{
-            flex: 1,
-            padding: "6px",
-            backgroundColor: preference === "balanced" ? "#e0e0e0" : "transparent",
-            border: "1px solid #ccc",
-            borderRadius: "4px",
-            fontSize: "12px",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "#333",
-            fontWeight: preference === "balanced" ? "600" : "400",
-          }}
+          className={`flex-1 py-1.5 px-1.5 border border-gray-300 rounded text-xs cursor-pointer flex items-center justify-center text-gray-700 
+            ${preference === "balanced" ? "bg-gray-200 font-semibold" : "bg-transparent font-normal"}`}
           aria-pressed={preference === "balanced"}
         >
           Balanced
@@ -68,31 +38,14 @@ export const FairnessSelector: React.FC<FairnessSelectorProps> = ({
         <button
           type="button"
           onClick={() => setPreference("strict")}
-          style={{
-            flex: 1,
-            padding: "6px",
-            backgroundColor: preference === "strict" ? "#e0e0e0" : "transparent",
-            border: "1px solid #ccc",
-            borderRadius: "4px",
-            fontSize: "12px",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "#333",
-            fontWeight: preference === "strict" ? "600" : "400",
-          }}
+          className={`flex-1 py-1.5 px-1.5 border border-gray-300 rounded text-xs cursor-pointer flex items-center justify-center text-gray-700 
+            ${preference === "strict" ? "bg-gray-200 font-semibold" : "bg-transparent font-normal"}`}
           aria-pressed={preference === "strict"}
         >
           Equal Times
         </button>
       </div>
-      <div style={{ 
-        fontSize: "11px", 
-        color: "#666", 
-        marginTop: "4px", 
-        textAlign: "center" 
-      }}>
+      <div className="text-xs text-gray-600 mt-1 text-center">
         {preference === 'strict' && '(Strongly favors the slower transport mode)'}
         {preference === 'balanced' && '(Moderately favors the slower transport mode)'}
         {preference === 'relaxed' && '(Closer to geographic midpoint)'}

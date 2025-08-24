@@ -25,13 +25,7 @@ export const PlacesList: React.FC<PlacesListProps> = ({
 }) => {
   if (isLoading) {
     return (
-      <div style={{ 
-        marginTop: "12px", 
-        padding: "12px", 
-        backgroundColor: "rgba(255, 255, 255, 0.8)", 
-        borderRadius: "4px",
-        textAlign: "center" 
-      }}>
+      <div className="mt-3 p-3 bg-white/80 rounded text-center">
         <div className="animate-pulse">Searching for places...</div>
       </div>
     );
@@ -39,54 +33,32 @@ export const PlacesList: React.FC<PlacesListProps> = ({
 
   if (places.length === 0) {
     return (
-      <div style={{ 
-        marginTop: "12px", 
-        padding: "12px", 
-        backgroundColor: "rgba(255, 255, 255, 0.8)", 
-        borderRadius: "4px",
-        textAlign: "center" 
-      }}>
+      <div className="mt-3 p-3 bg-white/80 rounded text-center">
         No places found in this area. Try changing the place type or locations.
       </div>
     );
   }
 
   return (
-    <div style={{ marginTop: "12px" }}>
-      <div style={{ fontSize: "14px", fontWeight: "500", marginBottom: "8px" }}>
+    <div className="mt-3">
+      <div className="text-sm font-medium mb-2">
         Recommended Places ({places.length})
       </div>
-      <div style={{ maxHeight: "300px", overflowY: "auto" }}>
+      <div className="max-h-[300px] overflow-y-auto">
         {places.map(place => (
           <div 
             key={place.id}
             onClick={() => onPlaceSelect(place)}
-            style={{
-              padding: "10px",
-              backgroundColor: "rgba(255, 255, 255, 0.8)",
-              marginBottom: "8px",
-              borderRadius: "4px",
-              cursor: "pointer",
-              border: "1px solid #eee",
-              transition: "all 0.2s ease",
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.95)";
-              e.currentTarget.style.boxShadow = "0 2px 4px rgba(0,0,0,0.1)";
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.8)";
-              e.currentTarget.style.boxShadow = "none";
-            }}
+            className="p-2.5 bg-white/80 mb-2 rounded cursor-pointer border border-gray-100 transition-all duration-200 hover:bg-white/95 hover:shadow"
           >
-            <div style={{ fontWeight: "600", fontSize: "14px" }}>{place.name}</div>
-            <div style={{ fontSize: "12px", color: "#666", marginTop: "2px" }}>{place.vicinity}</div>
-            <div style={{ display: "flex", alignItems: "center", marginTop: "4px" }}>
-              <div style={{ display: "flex", alignItems: "center" }}>
-                <span style={{ color: "#FFC107", marginRight: "4px" }}>★</span>
-                <span style={{ fontSize: "12px" }}>{place.rating}</span>
+            <div className="font-semibold text-sm">{place.name}</div>
+            <div className="text-xs text-gray-600 mt-0.5">{place.vicinity}</div>
+            <div className="flex items-center mt-1">
+              <div className="flex items-center">
+                <span className="text-amber-400 mr-1">★</span>
+                <span className="text-xs">{place.rating}</span>
               </div>
-              <div style={{ fontSize: "12px", color: "#666", marginLeft: "6px" }}>
+              <div className="text-xs text-gray-600 ml-1.5">
                 ({place.userRatingsTotal} reviews)
               </div>
             </div>

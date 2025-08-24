@@ -22,17 +22,11 @@ export const LocationInput: React.FC<LocationInputProps> = ({
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    if (inputRef.current) {
-      // Ensure the input is properly styled
-      inputRef.current.style.color = '#000';
-      inputRef.current.style.backgroundColor = '#fff';
-    }
-  }, []);
-
+  // No need for useEffect styling with Tailwind
+  
   return (
     <div>
-      <label style={{ fontSize: "14px", color: "#666", fontWeight: "500", marginBottom: "4px", display: "block" }}>
+      <label className="text-sm text-gray-600 font-medium mb-1 block">
         {label}
       </label>
       <Autocomplete
@@ -45,16 +39,7 @@ export const LocationInput: React.FC<LocationInputProps> = ({
           placeholder={placeholder}
           value={value}
           onChange={onChange}
-          style={{
-            padding: "8px",
-            fontSize: "16px",
-            borderRadius: "4px",
-            border: "1px solid #ccc",
-            width: "100%",
-            color: "#000",
-            backgroundColor: "#fff",
-            boxSizing: "border-box",
-          }}
+          className="p-2 text-base rounded border border-gray-300 w-full text-black bg-white box-border"
           id={id}
         />
       </Autocomplete>

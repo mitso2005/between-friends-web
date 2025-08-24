@@ -15,27 +15,15 @@ export const TransportModeSelector: React.FC<TransportModeSelectorProps> = ({
 }) => {
   return (
     <div>
-      <label style={{ fontSize: "14px", fontWeight: "500", color: "#666", marginBottom: "4px", display: "block" }}>
+      <label className="text-sm font-medium text-gray-600 mb-1 block">
         {label}
       </label>
-      <div style={{ display: "flex", gap: "8px" }}>
+      <div className="flex gap-2">
         <button
           type="button"
           onClick={() => setMode("DRIVING")}
-          style={{
-            flex: 1,
-            padding: "6px",
-            backgroundColor: mode === "DRIVING" ? "#e0e0e0" : "transparent",
-            border: "1px solid #ccc",
-            borderRadius: "4px",
-            fontSize: "12px",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "#333",
-            fontWeight: mode === "DRIVING" ? "600" : "400",
-          }}
+          className={`flex-1 py-1.5 border border-gray-300 rounded text-xs cursor-pointer flex items-center justify-center text-gray-700
+            ${mode === "DRIVING" ? "bg-gray-200 font-semibold" : "bg-transparent font-normal"}`}
           aria-pressed={mode === "DRIVING"}
         >
           🚗 Driving
@@ -43,20 +31,8 @@ export const TransportModeSelector: React.FC<TransportModeSelectorProps> = ({
         <button
           type="button"
           onClick={() => setMode("TRANSIT")}
-          style={{
-            flex: 1,
-            padding: "6px",
-            backgroundColor: mode === "TRANSIT" ? "#e0e0e0" : "transparent",
-            border: "1px solid #ccc",
-            borderRadius: "4px",
-            fontSize: "12px",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "#333",
-            fontWeight: mode === "TRANSIT" ? "600" : "400",
-          }}
+          className={`flex-1 py-1.5 border border-gray-300 rounded text-xs cursor-pointer flex items-center justify-center text-gray-700
+            ${mode === "TRANSIT" ? "bg-gray-200 font-semibold" : "bg-transparent font-normal"}`}
           aria-pressed={mode === "TRANSIT"}
         >
           🚌 Transit
@@ -64,20 +40,8 @@ export const TransportModeSelector: React.FC<TransportModeSelectorProps> = ({
         <button
           type="button"
           onClick={() => setMode("WALKING")}
-          style={{
-            flex: 1,
-            padding: "6px",
-            backgroundColor: mode === "WALKING" ? "#e0e0e0" : "transparent",
-            border: "1px solid #ccc",
-            borderRadius: "4px",
-            fontSize: "12px",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "#333",
-            fontWeight: mode === "WALKING" ? "600" : "400",
-          }}
+          className={`flex-1 py-1.5 border border-gray-300 rounded text-xs cursor-pointer flex items-center justify-center text-gray-700
+            ${mode === "WALKING" ? "bg-gray-200 font-semibold" : "bg-transparent font-normal"}`}
           aria-pressed={mode === "WALKING"}
         >
           🚶 Walking

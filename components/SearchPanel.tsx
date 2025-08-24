@@ -84,23 +84,9 @@ export const SearchPanel: React.FC = () => {
   
   return (
     <div
-      style={{
-        position: "absolute",
-        top: 24,
-        left: 24,
-        zIndex: 10,
-        background: "rgba(255,255,255,0.95)",
-        padding: "16px",
-        borderRadius: "8px",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-        display: "flex",
-        flexDirection: "column",
-        gap: "12px",
-        minWidth: "300px",
-        maxWidth: "400px",
-      }}
+      className="absolute top-6 left-6 z-10 bg-white/95 p-4 rounded-lg shadow-md flex flex-col gap-3 min-w-[300px] max-w-[400px]"
     >
-      <div style={{ fontSize: "12px", color: "#666", marginBottom: "8px" }}>
+      <div className="text-xs text-gray-600 mb-2">
         💡 Find the best meeting place between two locations
       </div>
       
@@ -153,56 +139,26 @@ export const SearchPanel: React.FC = () => {
         <button
           onClick={handleFindMeetingPoint}
           disabled={!coordsA || !coordsB || isCalculating}
-          style={{
-            marginTop: "12px",
-            padding: "10px 16px",
-            backgroundColor: "#FF8C00",
-            color: "white",
-            border: "none",
-            borderRadius: "4px",
-            fontWeight: "600",
-            fontSize: "16px",
-            cursor: coordsA && coordsB && !isCalculating ? "pointer" : "not-allowed",
-            opacity: coordsA && coordsB && !isCalculating ? 1 : 0.3,
-            transition: "opacity 0.2s ease-in-out",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
+          className={`mt-3 py-2.5 px-4 bg-orange-500 text-white rounded font-semibold text-base flex items-center justify-center
+            ${coordsA && coordsB && !isCalculating ? 'cursor-pointer opacity-100' : 'cursor-not-allowed opacity-30'}
+            transition-opacity duration-200`}
         >
           {isCalculating ? "Calculating..." : apiKeyError ? "Use Geographic Midpoint" : "Find Meeting Point"}
         </button>
       ) : (
-        <div style={{ display: "flex", gap: "8px", marginTop: "12px" }}>
+        <div className="flex gap-2 mt-3">
           <button
             onClick={handleFindPlaces}
             disabled={isSearchingPlaces}
-            style={{
-              flex: 1,
-              padding: "10px 16px",
-              backgroundColor: "#FF8C00",
-              color: "white",
-              border: "none",
-              borderRadius: "4px",
-              fontWeight: "600",
-              fontSize: "15px",
-              cursor: isSearchingPlaces ? "not-allowed" : "pointer",
-              opacity: isSearchingPlaces ? 0.3 : 1,
-            }}
+            className={`flex-1 py-2.5 px-4 bg-orange-500 text-white border-none rounded font-semibold text-sm
+              ${isSearchingPlaces ? 'cursor-not-allowed opacity-30' : 'cursor-pointer opacity-100'}`}
           >
             {isSearchingPlaces ? "Searching..." : "Find Places"}
           </button>
           
           <button
             onClick={() => setShowRecommendations(false)}
-            style={{
-              padding: "10px",
-              backgroundColor: "transparent",
-              color: "#666",
-              border: "1px solid #ccc",
-              borderRadius: "4px",
-              fontSize: "14px",
-            }}
+            className="py-2.5 px-2.5 bg-transparent text-gray-600 border border-gray-300 rounded text-sm"
           >
             Back
           </button>
@@ -222,23 +178,17 @@ export const SearchPanel: React.FC = () => {
       )}
 
       {selectedPlace && (
-        <div style={{
-          marginTop: "12px",
-          padding: "10px",
-          backgroundColor: "rgba(255, 140, 0, 0.1)",
-          border: "1px solid rgba(255, 140, 0, 0.2)",
-          borderRadius: "4px"
-        }}>
-          <div style={{ fontSize: "14px", fontWeight: "600", marginBottom: "4px" }}>
+        <div className="mt-3 p-2.5 bg-orange-50 border border-orange-200 rounded">
+          <div className="text-sm font-semibold mb-1">
             Selected Place: {selectedPlace.name}
           </div>
-          <div style={{ fontSize: "12px", marginBottom: "4px" }}>
+          <div className="text-xs mb-1">
             {selectedPlace.vicinity}
           </div>
-          <div style={{ display: "flex", alignItems: "center" }}>
-            <span style={{ color: "#FFC107", marginRight: "4px" }}>★</span>
-            <span style={{ fontSize: "12px" }}>{selectedPlace.rating}</span>
-            <span style={{ fontSize: "12px", color: "#666", marginLeft: "4px" }}>
+          <div className="flex items-center">
+            <span className="text-amber-400 mr-1">★</span>
+            <span className="text-xs">{selectedPlace.rating}</span>
+            <span className="text-xs text-gray-600 ml-1">
               ({selectedPlace.userRatingsTotal} reviews)
             </span>
           </div>
@@ -256,7 +206,7 @@ export const SearchPanel: React.FC = () => {
       )}
 
       {mapBounds && (
-        <div style={{ fontSize: "10px", color: "#888", marginTop: "8px" }}>
+        <div className="text-[10px] text-gray-400 mt-2">
           Searching in: {mapBounds.getSouthWest().lat().toFixed(3)}, {mapBounds.getSouthWest().lng().toFixed(3)} to {mapBounds.getNorthEast().lat().toFixed(3)}, {mapBounds.getNorthEast().lng().toFixed(3)}
         </div>
       )}

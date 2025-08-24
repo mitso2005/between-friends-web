@@ -2,10 +2,8 @@ import React from 'react';
 import { GoogleMap, Marker, DirectionsRenderer } from '@react-google-maps/api';
 import { useMapContext } from '../contexts/MapContext';
 
-const containerStyle = {
-  width: "100vw",
-  height: "100vh",
-};
+// Using className instead of inline style
+const mapContainerClassName = "w-screen h-screen";
 
 const defaultCenter = {
   lat: -37.8136,
@@ -57,11 +55,11 @@ export const MapView: React.FC<MapViewProps> = ({ isLoaded }) => {
     }
   };
   
-  if (!isLoaded) return <div>Loading Maps...</div>;
+  if (!isLoaded) return <div className="text-center p-4">Loading Maps...</div>;
   
   return (
     <GoogleMap
-      mapContainerStyle={containerStyle}
+      mapContainerClassName={mapContainerClassName}
       center={coordsA || coordsB || defaultCenter}
       zoom={coordsA || coordsB ? 12 : 10}
       options={{

@@ -13,27 +13,15 @@ export const PlaceTypeSelector: React.FC<PlaceTypeSelectorProps> = ({
 }) => {
   return (
     <div>
-      <label style={{ fontSize: "14px", fontWeight: "500", color: "#666", marginBottom: "4px", display: "block" }}>
+      <label className="text-sm font-medium text-gray-600 mb-1 block">
         What would you like to find?
       </label>
-      <div style={{ display: "flex", gap: "8px" }}>
+      <div className="flex gap-2">
         <button
           type="button"
           onClick={() => onTypeChange('cafe')}
-          style={{
-            flex: 1,
-            padding: "6px",
-            backgroundColor: selectedType === 'cafe' ? "#e0e0e0" : "transparent",
-            border: "1px solid #ccc",
-            borderRadius: "4px",
-            fontSize: "12px",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "#333",
-            fontWeight: selectedType === 'cafe' ? "600" : "400",
-          }}
+          className={`flex-1 py-1.5 border border-gray-300 rounded text-xs cursor-pointer flex items-center justify-center text-gray-700
+            ${selectedType === 'cafe' ? "bg-gray-200 font-semibold" : "bg-transparent font-normal"}`}
           aria-pressed={selectedType === 'cafe'}
         >
           ☕ Cafe
@@ -41,20 +29,8 @@ export const PlaceTypeSelector: React.FC<PlaceTypeSelectorProps> = ({
         <button
           type="button"
           onClick={() => onTypeChange('restaurant')}
-          style={{
-            flex: 1,
-            padding: "6px",
-            backgroundColor: selectedType === 'restaurant' ? "#e0e0e0" : "transparent",
-            border: "1px solid #ccc",
-            borderRadius: "4px",
-            fontSize: "12px",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "#333",
-            fontWeight: selectedType === 'restaurant' ? "600" : "400",
-          }}
+          className={`flex-1 py-1.5 border border-gray-300 rounded text-xs cursor-pointer flex items-center justify-center text-gray-700
+            ${selectedType === 'restaurant' ? "bg-gray-200 font-semibold" : "bg-transparent font-normal"}`}
           aria-pressed={selectedType === 'restaurant'}
         >
           🍽️ Restaurant
@@ -62,20 +38,8 @@ export const PlaceTypeSelector: React.FC<PlaceTypeSelectorProps> = ({
         <button
           type="button"
           onClick={() => onTypeChange('bar')}
-          style={{
-            flex: 1,
-            padding: "6px",
-            backgroundColor: selectedType === 'bar' ? "#e0e0e0" : "transparent",
-            border: "1px solid #ccc",
-            borderRadius: "4px",
-            fontSize: "12px",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "#333",
-            fontWeight: selectedType === 'bar' ? "600" : "400",
-          }}
+          className={`flex-1 py-1.5 border border-gray-300 rounded text-xs cursor-pointer flex items-center justify-center text-gray-700
+            ${selectedType === 'bar' ? "bg-gray-200 font-semibold" : "bg-transparent font-normal"}`}
           aria-pressed={selectedType === 'bar'}
         >
           🍸 Bar
