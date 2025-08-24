@@ -2,23 +2,22 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
-  --input-text: #171717;
+  --title-text: #2d2d2d;  /* Charcoal black for titles */
+  --foreground: #5a5a5a;  /* Grey for normal text */
+  --accent: #ff8c00;      /* Orange accent color */
+  --accent-light: #ffdab3; /* Light orange for subtle accents */
+  --input-text: #2d2d2d;
   --input-background: #ffffff;
   --input-border: #cccccc;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
-    --foreground: #ededed;
+    --title-text: #ededed;
+    --foreground: #a0a0a0;
+    --accent: #ff8c00;
+    --accent-light: #804500;
     --input-text: #ededed;
     --input-background: #1a1a1a;
     --input-border: #444444;
@@ -31,14 +30,54 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* Ensure input text is visible */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--title-text);
+  font-weight: 600;
+}
+
+/* Custom styles that can't be easily replaced by Tailwind classes */
 input, textarea, select {
   color: var(--input-text) !important;
   background-color: var(--input-background) !important;
   border-color: var(--input-border) !important;
 }
 
-/* Override any potential conflicting styles */
+/* Google Maps Places Autocomplete container needs this z-index */
 .pac-container {
   z-index: 1000;
+}
+
+/* Custom color utility classes */
+.bg-accent {
+  background-color: var(--accent);
+}
+
+.text-accent {
+  color: var(--accent);
+}
+
+.border-accent {
+  border-color: var(--accent);
+}
+
+.bg-accent-light {
+  background-color: var(--accent-light);
+}
+
+.text-title {
+  color: var(--title-text);
+}
+
+/* Button styling with orange accent */
+.btn-primary {
+  background-color: var(--accent);
+  color: white;
+  border-radius: 0.375rem;
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  transition: opacity 0.2s;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
 }

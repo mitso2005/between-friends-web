@@ -39,11 +39,11 @@ export const RouteInfo: React.FC<RouteInfoProps> = ({
   // Get Tailwind classes based on fairness
   const containerClasses = isTimeFair 
     ? "bg-green-50 border border-green-200" // Green for fair
-    : "bg-orange-50 border border-orange-200"; // Orange for unfair
+    : "bg-accent-light border border-accent"; // Orange for unfair
   
   return (
     <div className={`mt-3 p-2.5 rounded ${containerClasses}`}>
-      <div className="text-sm font-semibold mb-1.5">
+      <div className="text-sm text-title font-semibold mb-1.5">
         Route Information
       </div>
       <div className={`text-xs mb-1 ${longerRoute === 'A' ? 'font-semibold' : 'font-normal'}`}>
@@ -60,7 +60,7 @@ export const RouteInfo: React.FC<RouteInfoProps> = ({
       
       {/* Fairness indicator */}
       {!isTimeFair && (
-        <div className="text-xs mt-2 p-1.5 bg-orange-50 border border-orange-100 rounded">
+        <div className="text-xs mt-2 p-1.5 bg-accent-light border border-accent rounded">
           <strong>Note:</strong> Travel times differ by {timeDiffMinutes} minutes. 
           {transportModeA !== transportModeB && (
             <span> This may be the best possible compromise given the different transport modes.</span>
@@ -72,7 +72,7 @@ export const RouteInfo: React.FC<RouteInfoProps> = ({
       )}
       
       {isTimeFair && (
-        <div className="text-xs mt-2 text-green-700 font-medium">
+        <div className="text-xs mt-2 text-accent font-medium">
           ✓ Travel times are fair and balanced
         </div>
       )}

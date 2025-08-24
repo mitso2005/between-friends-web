@@ -15,15 +15,17 @@ export const TransportModeSelector: React.FC<TransportModeSelectorProps> = ({
 }) => {
   return (
     <div>
-      <label className="text-sm font-medium text-gray-600 mb-1 block">
+      <label className="text-sm font-medium text-title mb-1 block">
         {label}
       </label>
       <div className="flex gap-2">
         <button
           type="button"
           onClick={() => setMode("DRIVING")}
-          className={`flex-1 py-1.5 border border-gray-300 rounded text-xs cursor-pointer flex items-center justify-center text-gray-700
-            ${mode === "DRIVING" ? "bg-gray-200 font-semibold" : "bg-transparent font-normal"}`}
+          className={`flex-1 py-1.5 border rounded text-xs cursor-pointer flex items-center justify-center
+            ${mode === "DRIVING" 
+              ? "bg-accent text-white border-accent font-semibold" 
+              : "bg-transparent text-gray-700 border-gray-300 font-normal"}`}
           aria-pressed={mode === "DRIVING"}
         >
           🚗 Driving
@@ -31,8 +33,10 @@ export const TransportModeSelector: React.FC<TransportModeSelectorProps> = ({
         <button
           type="button"
           onClick={() => setMode("TRANSIT")}
-          className={`flex-1 py-1.5 border border-gray-300 rounded text-xs cursor-pointer flex items-center justify-center text-gray-700
-            ${mode === "TRANSIT" ? "bg-gray-200 font-semibold" : "bg-transparent font-normal"}`}
+          className={`flex-1 py-1.5 border rounded text-xs cursor-pointer flex items-center justify-center
+            ${mode === "TRANSIT" 
+              ? "bg-accent text-white border-accent font-semibold" 
+              : "bg-transparent text-gray-700 border-gray-300 font-normal"}`}
           aria-pressed={mode === "TRANSIT"}
         >
           🚌 Transit
@@ -40,8 +44,10 @@ export const TransportModeSelector: React.FC<TransportModeSelectorProps> = ({
         <button
           type="button"
           onClick={() => setMode("WALKING")}
-          className={`flex-1 py-1.5 border border-gray-300 rounded text-xs cursor-pointer flex items-center justify-center text-gray-700
-            ${mode === "WALKING" ? "bg-gray-200 font-semibold" : "bg-transparent font-normal"}`}
+          className={`flex-1 py-1.5 border rounded text-xs cursor-pointer flex items-center justify-center
+            ${mode === "WALKING" 
+              ? "bg-accent text-white border-accent font-semibold" 
+              : "bg-transparent text-gray-700 border-gray-300 font-normal"}`}
           aria-pressed={mode === "WALKING"}
         >
           🚶 Walking

@@ -84,7 +84,7 @@ export const SearchPanel: React.FC = () => {
   
   return (
     <div
-      className="absolute top-6 left-6 z-10 bg-white/95 p-4 rounded-lg shadow-md flex flex-col gap-3 min-w-[300px] max-w-[400px]"
+      className="absolute top-6 left-6 z-10 bg-white p-4 rounded-lg shadow-md flex flex-col gap-3 min-w-[300px] max-w-[400px]"
     >
       <div className="text-xs text-gray-600 mb-2">
         💡 Find the best meeting place between two locations
@@ -139,7 +139,7 @@ export const SearchPanel: React.FC = () => {
         <button
           onClick={handleFindMeetingPoint}
           disabled={!coordsA || !coordsB || isCalculating}
-          className={`mt-3 py-2.5 px-4 bg-orange-500 text-white rounded font-semibold text-base flex items-center justify-center
+          className={`mt-3 py-2.5 px-4 bg-accent text-white rounded font-semibold text-base flex items-center justify-center
             ${coordsA && coordsB && !isCalculating ? 'cursor-pointer opacity-100' : 'cursor-not-allowed opacity-30'}
             transition-opacity duration-200`}
         >
@@ -150,7 +150,7 @@ export const SearchPanel: React.FC = () => {
           <button
             onClick={handleFindPlaces}
             disabled={isSearchingPlaces}
-            className={`flex-1 py-2.5 px-4 bg-orange-500 text-white border-none rounded font-semibold text-sm
+            className={`flex-1 py-2.5 px-4 bg-accent text-white border-none rounded font-semibold text-sm
               ${isSearchingPlaces ? 'cursor-not-allowed opacity-30' : 'cursor-pointer opacity-100'}`}
           >
             {isSearchingPlaces ? "Searching..." : "Find Places"}
@@ -178,15 +178,15 @@ export const SearchPanel: React.FC = () => {
       )}
 
       {selectedPlace && (
-        <div className="mt-3 p-2.5 bg-orange-50 border border-orange-200 rounded">
-          <div className="text-sm font-semibold mb-1">
+        <div className="mt-3 p-2.5 bg-accent-light border border-accent rounded">
+          <div className="text-sm text-title font-semibold mb-1">
             Selected Place: {selectedPlace.name}
           </div>
           <div className="text-xs mb-1">
             {selectedPlace.vicinity}
           </div>
           <div className="flex items-center">
-            <span className="text-amber-400 mr-1">★</span>
+            <span className="text-accent mr-1">★</span>
             <span className="text-xs">{selectedPlace.rating}</span>
             <span className="text-xs text-gray-600 ml-1">
               ({selectedPlace.userRatingsTotal} reviews)

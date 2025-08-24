@@ -13,15 +13,17 @@ export const PlaceTypeSelector: React.FC<PlaceTypeSelectorProps> = ({
 }) => {
   return (
     <div>
-      <label className="text-sm font-medium text-gray-600 mb-1 block">
+      <label className="text-sm font-medium text-title mb-1 block">
         What would you like to find?
       </label>
       <div className="flex gap-2">
         <button
           type="button"
           onClick={() => onTypeChange('cafe')}
-          className={`flex-1 py-1.5 border border-gray-300 rounded text-xs cursor-pointer flex items-center justify-center text-gray-700
-            ${selectedType === 'cafe' ? "bg-gray-200 font-semibold" : "bg-transparent font-normal"}`}
+          className={`flex-1 py-1.5 border rounded text-xs cursor-pointer flex items-center justify-center
+            ${selectedType === 'cafe' 
+              ? "bg-accent text-white border-accent font-semibold" 
+              : "bg-transparent text-gray-700 border-gray-300 font-normal"}`}
           aria-pressed={selectedType === 'cafe'}
         >
           ☕ Cafe
@@ -29,8 +31,10 @@ export const PlaceTypeSelector: React.FC<PlaceTypeSelectorProps> = ({
         <button
           type="button"
           onClick={() => onTypeChange('restaurant')}
-          className={`flex-1 py-1.5 border border-gray-300 rounded text-xs cursor-pointer flex items-center justify-center text-gray-700
-            ${selectedType === 'restaurant' ? "bg-gray-200 font-semibold" : "bg-transparent font-normal"}`}
+          className={`flex-1 py-1.5 border rounded text-xs cursor-pointer flex items-center justify-center
+            ${selectedType === 'restaurant' 
+              ? "bg-accent text-white border-accent font-semibold" 
+              : "bg-transparent text-gray-700 border-gray-300 font-normal"}`}
           aria-pressed={selectedType === 'restaurant'}
         >
           🍽️ Restaurant
@@ -38,8 +42,10 @@ export const PlaceTypeSelector: React.FC<PlaceTypeSelectorProps> = ({
         <button
           type="button"
           onClick={() => onTypeChange('bar')}
-          className={`flex-1 py-1.5 border border-gray-300 rounded text-xs cursor-pointer flex items-center justify-center text-gray-700
-            ${selectedType === 'bar' ? "bg-gray-200 font-semibold" : "bg-transparent font-normal"}`}
+          className={`flex-1 py-1.5 border rounded text-xs cursor-pointer flex items-center justify-center
+            ${selectedType === 'bar' 
+              ? "bg-accent text-white border-accent font-semibold" 
+              : "bg-transparent text-gray-700 border-gray-300 font-normal"}`}
           aria-pressed={selectedType === 'bar'}
         >
           🍸 Bar

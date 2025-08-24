@@ -21,8 +21,6 @@ export const LocationInput: React.FC<LocationInputProps> = ({
   id,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
-
-  // No need for useEffect styling with Tailwind
   
   return (
     <div>
@@ -39,7 +37,7 @@ export const LocationInput: React.FC<LocationInputProps> = ({
           placeholder={placeholder}
           value={value}
           onChange={onChange}
-          className="p-2 text-base rounded border border-gray-300 w-full text-black bg-white box-border"
+          className="p-2 text-base rounded border border-gray-300 w-full bg-white box-border"
           id={id}
         />
       </Autocomplete>

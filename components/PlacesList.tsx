@@ -25,15 +25,15 @@ export const PlacesList: React.FC<PlacesListProps> = ({
 }) => {
   if (isLoading) {
     return (
-      <div className="mt-3 p-3 bg-white/80 rounded text-center">
-        <div className="animate-pulse">Searching for places...</div>
+      <div className="mt-3 p-3 bg-white rounded text-center border border-gray-200">
+        <div className="animate-pulse text-accent">Searching for places...</div>
       </div>
     );
   }
 
   if (places.length === 0) {
     return (
-      <div className="mt-3 p-3 bg-white/80 rounded text-center">
+      <div className="mt-3 p-3 bg-white rounded text-center border border-gray-200">
         No places found in this area. Try changing the place type or locations.
       </div>
     );
@@ -41,7 +41,7 @@ export const PlacesList: React.FC<PlacesListProps> = ({
 
   return (
     <div className="mt-3">
-      <div className="text-sm font-medium mb-2">
+      <div className="text-sm text-title font-medium mb-2">
         Recommended Places ({places.length})
       </div>
       <div className="max-h-[300px] overflow-y-auto">
@@ -49,13 +49,13 @@ export const PlacesList: React.FC<PlacesListProps> = ({
           <div 
             key={place.id}
             onClick={() => onPlaceSelect(place)}
-            className="p-2.5 bg-white/80 mb-2 rounded cursor-pointer border border-gray-100 transition-all duration-200 hover:bg-white/95 hover:shadow"
+            className="p-2.5 bg-white mb-2 rounded cursor-pointer border border-gray-100 transition-all duration-200 hover:border-accent hover:shadow"
           >
-            <div className="font-semibold text-sm">{place.name}</div>
+            <div className="font-semibold text-sm text-title">{place.name}</div>
             <div className="text-xs text-gray-600 mt-0.5">{place.vicinity}</div>
             <div className="flex items-center mt-1">
               <div className="flex items-center">
-                <span className="text-amber-400 mr-1">★</span>
+                <span className="text-accent mr-1">★</span>
                 <span className="text-xs">{place.rating}</span>
               </div>
               <div className="text-xs text-gray-600 ml-1.5">

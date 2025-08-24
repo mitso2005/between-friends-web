@@ -18,7 +18,7 @@ export default function Home() {
 
   return (
     <MapProvider>
-      <div style={{ position: "relative", width: "100vw", height: "100vh" }}>
+      <div className="relative w-full h-full">
         <SearchPanel />
         <MapView isLoaded={isLoaded} />
       </div>

@@ -8,7 +8,7 @@ interface ErrorMessageProps {
 export const ErrorMessage: React.FC<ErrorMessageProps> = ({ message, type }) => {
   const className = type === 'error' 
     ? 'bg-red-50 border border-red-200 text-red-700' 
-    : 'bg-orange-50 border border-orange-300 text-orange-800';
+    : 'bg-accent-light border border-accent text-title';
   
   return (
     <div className={`mt-2 p-2 rounded text-sm ${className}`}>
@@ -19,7 +19,7 @@ export const ErrorMessage: React.FC<ErrorMessageProps> = ({ message, type }) => 
 
 export const ApiKeyError: React.FC = () => {
   return (
-    <div className="mt-3 p-2.5 bg-orange-50 border border-orange-300 rounded text-sm text-orange-800">
+    <div className="mt-3 p-2.5 bg-accent-light border border-accent rounded text-sm text-title">
       <div className="font-semibold mb-1">API Key Warning</div>
       <p>Your Google Maps API key is not authorized for the required API services. To enable all features:</p>
       <ol className="ml-5 mt-2">
@@ -33,7 +33,7 @@ export const ApiKeyError: React.FC = () => {
 
 export const PlacesApiError: React.FC = () => {
   return (
-    <div className="mt-3 p-2.5 bg-orange-50 border border-orange-300 rounded text-sm text-orange-800">
+    <div className="mt-3 p-2.5 bg-accent-light border border-accent rounded text-sm text-title">
       <div className="font-semibold mb-1">Places API Warning</div>
       <p>Could not search for nearby places. To enable this feature:</p>
       <ol className="ml-5 mt-2">
