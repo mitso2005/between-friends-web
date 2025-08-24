@@ -31,7 +31,9 @@ export const MapView: React.FC<MapViewProps> = ({ isLoaded }) => {
     timeMidpoint, 
     directionsA, 
     directionsB, 
-    apiKeyError 
+    apiKeyError,
+    recommendedPlaces,
+    selectedPlace
   } = useMapContext();
   
   const onLoad = (mapInstance: google.maps.Map) => {
@@ -71,7 +73,7 @@ export const MapView: React.FC<MapViewProps> = ({ isLoaded }) => {
       onLoad={onLoad}
       onBoundsChanged={onBoundsChanged}
     >
-      {/* Original markers for debugging */}
+      {/* Location markers */}
       {coordsA && (
         <Marker 
           position={coordsA} 
@@ -86,7 +88,9 @@ export const MapView: React.FC<MapViewProps> = ({ isLoaded }) => {
           label={{ text: "B", color: "white" }}
         />
       )}
-      {midpoint && (
+      
+      {/* Midpoint markers */}
+      {midpoint && !selectedPlace && (
         <Marker 
           position={midpoint}
           title="Distance Midpoint"
@@ -102,8 +106,7 @@ export const MapView: React.FC<MapViewProps> = ({ isLoaded }) => {
         />
       )}
       
-      {/* Time-based midpoint */}
-      {timeMidpoint && (
+      {timeMidpoint && !selectedPlace && (
         <Marker 
           position={timeMidpoint}
           title="Time Midpoint"
@@ -119,8 +122,41 @@ export const MapView: React.FC<MapViewProps> = ({ isLoaded }) => {
         />
       )}
       
-      {/* Direction routes */}
-      {!apiKeyError && directionsA && (
+      {/* Recommended place markers */}
+      {!selectedPlace && recommendedPlaces.map(place => (
+        <Marker
+          key={place.id}
+          position={place.location}
+          title={place.name}
+          icon={{
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 8,
+            fillColor: "#4CAF50", // Green color for recommended places
+            fillOpacity: 0.8,
+            strokeColor: "#FFFFFF",
+            strokeWeight: 2,
+          }}
+        />
+      ))}
+      
+      {/* Selected place marker */}
+      {selectedPlace && (
+        <Marker 
+          position={selectedPlace.location}
+          title={selectedPlace.name}
+          icon={{
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 12,
+            fillColor: "#4CAF50", // Green color for the selected place
+            fillOpacity: 1,
+            strokeColor: "#FFFFFF",
+            strokeWeight: 2,
+          }}
+        />
+      )}
+      
+      {/* Direction routes - only shown when a place is selected */}
+      {!apiKeyError && directionsA && selectedPlace && (
         <DirectionsRenderer
           directions={directionsA}
           options={{
@@ -134,7 +170,7 @@ export const MapView: React.FC<MapViewProps> = ({ isLoaded }) => {
         />
       )}
       
-      {!apiKeyError && directionsB && (
+      {!apiKeyError && directionsB && selectedPlace && (
         <DirectionsRenderer
           directions={directionsB}
           options={{

@@ -1,4 +1,6 @@
 import { TransportMode } from "../components/TransportModeSelector";
+import { Place } from "../components/PlacesList";
+import { PlaceType } from "../components/PlaceTypeSelector";
 
 export interface CalculationResult {
   timeMidpoint: google.maps.LatLngLiteral;
@@ -241,5 +243,102 @@ export const calculateTimeMidpoint = async (
         apiKeyError: false
       };
     }
+  }
+};
+
+// Determine search radius based on transport modes
+export const getSearchRadius = (
+  transportModeA: TransportMode,
+  transportModeB: TransportMode
+): number => {
+  // If either person is walking or using public transport, use smaller radius
+  if (transportModeA === 'WALKING' || transportModeA === 'TRANSIT' ||
+      transportModeB === 'WALKING' || transportModeB === 'TRANSIT') {
+    return 500; // 500 meters
+  } else {
+    return 2000; // 2 kilometers
+  }
+};
+
+// Search for places near the midpoint
+export const findNearbyPlaces = async (
+  midpoint: google.maps.LatLngLiteral,
+  placeType: PlaceType,
+  radius: number
+): Promise<Place[]> => {
+  return new Promise((resolve, reject) => {
+    try {
+      const placesService = new google.maps.places.PlacesService(
+        document.createElement('div')
+      );
+      
+      placesService.nearbySearch(
+        {
+          location: midpoint,
+          radius: radius,
+          type: placeType, // Google Maps API uses the same types we defined
+          rankBy: google.maps.places.RankBy.PROMINENCE
+        },
+        (results, status) => {
+          if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+            // Convert the results to our Place type
+            const places: Place[] = results.map(result => ({
+              id: result.place_id || `place-${Math.random()}`,
+              name: result.name || 'Unnamed Place',
+              vicinity: result.vicinity || '',
+              rating: result.rating || 0,
+              userRatingsTotal: result.user_ratings_total || 0,
+              location: {
+                lat: result.geometry?.location?.lat() || midpoint.lat,
+                lng: result.geometry?.location?.lng() || midpoint.lng
+              },
+              photos: result.photos,
+              types: result.types || [],
+            }));
+            
+            // Sort places by rating (highest first)
+            const sortedPlaces = places.sort((a, b) => b.rating - a.rating);
+            
+            resolve(sortedPlaces);
+          } else {
+            resolve([]); // Return empty array if no results or error
+          }
+        }
+      );
+    } catch (error) {
+      console.error("Error finding nearby places:", error);
+      resolve([]); // Return empty array on error
+    }
+  });
+};
+
+// Get route to a specific place
+export const getRouteToPlace = async (
+  origin: google.maps.LatLngLiteral,
+  destination: google.maps.LatLngLiteral,
+  transportMode: TransportMode
+): Promise<google.maps.DirectionsResult | null> => {
+  try {
+    const directionsService = new google.maps.DirectionsService();
+    
+    return new Promise((resolve, reject) => {
+      directionsService.route(
+        {
+          origin: origin,
+          destination: destination,
+          travelMode: transportMode as google.maps.TravelMode,
+        },
+        (result, status) => {
+          if (status === google.maps.DirectionsStatus.OK && result) {
+            resolve(result);
+          } else {
+            reject(status);
+          }
+        }
+      );
+    });
+  } catch (error) {
+    console.error("Error getting route to place:", error);
+    return null;
   }
 };

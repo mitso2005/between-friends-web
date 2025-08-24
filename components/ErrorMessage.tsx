@@ -43,13 +43,34 @@ export const ApiKeyError: React.FC = () => {
       color: "#E65100"
     }}>
       <div style={{ fontWeight: "600", marginBottom: "4px" }}>API Key Warning</div>
-      <p>Your Google Maps API key is not authorized for the Directions Service. To enable route calculation:</p>
+      <p>Your Google Maps API key is not authorized for the required API services. To enable all features:</p>
       <ol style={{ marginLeft: "20px", marginTop: "8px" }}>
         <li>Go to the Google Cloud Console</li>
-        <li>Enable the "Directions API" for your project</li>
+        <li>Enable the "Directions API" and "Places API" for your project</li>
         <li>Make sure billing is set up for your Google Cloud account</li>
       </ol>
-      <p style={{ marginTop: "8px" }}>Currently using geographic midpoint only.</p>
+    </div>
+  );
+};
+
+export const PlacesApiError: React.FC = () => {
+  return (
+    <div style={{ 
+      marginTop: "12px", 
+      padding: "10px", 
+      backgroundColor: "#FFF3E0", 
+      border: "1px solid #FFB74D",
+      borderRadius: "4px",
+      fontSize: "14px",
+      color: "#E65100"
+    }}>
+      <div style={{ fontWeight: "600", marginBottom: "4px" }}>Places API Warning</div>
+      <p>Could not search for nearby places. To enable this feature:</p>
+      <ol style={{ marginLeft: "20px", marginTop: "8px" }}>
+        <li>Go to the Google Cloud Console</li>
+        <li>Enable the "Places API" for your project</li>
+        <li>Make sure billing is set up for your Google Cloud account</li>
+      </ol>
     </div>
   );
 };

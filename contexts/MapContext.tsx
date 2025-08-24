@@ -1,6 +1,14 @@
 import React, { createContext, useState, useContext, useRef, ReactNode } from 'react';
 import { TransportMode } from '../components/TransportModeSelector';
-import { calculateTimeMidpoint, calculateDistanceMidpoint } from '../utils/mapCalculations';
+import { Place } from '../components/PlacesList';
+import { PlaceType } from '../components/PlaceTypeSelector';
+import { 
+  calculateTimeMidpoint, 
+  calculateDistanceMidpoint,
+  findNearbyPlaces,
+  getSearchRadius,
+  getRouteToPlace
+} from '../utils/mapCalculations';
 
 interface MapContextType {
   // Map state
@@ -32,6 +40,12 @@ interface MapContextType {
   autocompleteA: React.RefObject<google.maps.places.Autocomplete | null>;
   autocompleteB: React.RefObject<google.maps.places.Autocomplete | null>;
   
+  // Place-related state
+  selectedPlaceType: PlaceType;
+  recommendedPlaces: Place[];
+  selectedPlace: Place | null;
+  isSearchingPlaces: boolean;
+  
   // Actions
   setMap: (map: google.maps.Map | null) => void;
   setMapBounds: (bounds: google.maps.LatLngBounds | null) => void;
@@ -45,6 +59,10 @@ interface MapContextType {
   onPlaceChangedA: () => void;
   onPlaceChangedB: () => void;
   calculateMeetingPoint: () => Promise<void>;
+  setSelectedPlaceType: (type: PlaceType) => void;
+  findRecommendedPlaces: () => Promise<void>;
+  selectPlace: (place: Place) => Promise<void>;
+  clearSelectedPlace: () => void;
 }
 
 const MapContext = createContext<MapContextType | undefined>(undefined);
@@ -70,6 +88,12 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   // Refs
   const autocompleteA = useRef<google.maps.places.Autocomplete | null>(null);
   const autocompleteB = useRef<google.maps.places.Autocomplete | null>(null);
+  
+  // Place-related state
+  const [selectedPlaceType, setSelectedPlaceType] = useState<PlaceType>('restaurant');
+  const [recommendedPlaces, setRecommendedPlaces] = useState<Place[]>([]);
+  const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
+  const [isSearchingPlaces, setIsSearchingPlaces] = useState<boolean>(false);
   
   // Helper functions
   const updateAutocompleteBias = (bounds: google.maps.LatLngBounds) => {
@@ -167,6 +191,66 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
   };
   
+  // Find recommended places near the midpoint
+  const findRecommendedPlaces = async () => {
+    if (!timeMidpoint) return;
+    
+    setIsSearchingPlaces(true);
+    setRecommendedPlaces([]);
+    
+    try {
+      // Determine search radius based on transport modes
+      const radius = getSearchRadius(transportModeA, transportModeB);
+      
+      // Find places
+      const places = await findNearbyPlaces(timeMidpoint, selectedPlaceType, radius);
+      setRecommendedPlaces(places);
+    } catch (error) {
+      console.error("Error finding recommended places:", error);
+    } finally {
+      setIsSearchingPlaces(false);
+    }
+  };
+  
+  // Select a place and calculate routes to it
+  const selectPlace = async (place: Place) => {
+    if (!coordsA || !coordsB) return;
+    
+    setSelectedPlace(place);
+    setIsCalculating(true);
+    
+    try {
+      // Get routes from both locations to the selected place
+      const [routeA, routeB] = await Promise.all([
+        getRouteToPlace(coordsA, place.location, transportModeA),
+        getRouteToPlace(coordsB, place.location, transportModeB),
+      ]);
+      
+      setDirectionsA(routeA);
+      setDirectionsB(routeB);
+      
+      // Adjust map to show both routes
+      if (map && routeA && routeB) {
+        const bounds = new google.maps.LatLngBounds();
+        routeA.routes[0].overview_path.forEach(point => bounds.extend(point));
+        routeB.routes[0].overview_path.forEach(point => bounds.extend(point));
+        map.fitBounds(bounds, { top: 100, right: 50, bottom: 50, left: 350 });
+      }
+    } catch (error) {
+      console.error("Error getting routes to selected place:", error);
+    } finally {
+      setIsCalculating(false);
+    }
+  };
+  
+  // Clear selected place
+  const clearSelectedPlace = () => {
+    setSelectedPlace(null);
+    // Keep the directions if needed or clear them
+    // setDirectionsA(null);
+    // setDirectionsB(null);
+  };
+  
   // Context value
   const value: MapContextType = {
     map,
@@ -186,6 +270,10 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     calculationError,
     autocompleteA,
     autocompleteB,
+    selectedPlaceType,
+    recommendedPlaces,
+    selectedPlace,
+    isSearchingPlaces,
     setMap,
     setMapBounds,
     setLocationA,
@@ -198,6 +286,10 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     onPlaceChangedA,
     onPlaceChangedB,
     calculateMeetingPoint,
+    setSelectedPlaceType,
+    findRecommendedPlaces,
+    selectPlace,
+    clearSelectedPlace,
   };
   
   return <MapContext.Provider value={value}>{children}</MapContext.Provider>;
