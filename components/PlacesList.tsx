@@ -10,6 +10,7 @@ export interface Place {
   location: google.maps.LatLngLiteral;
   photos?: google.maps.places.PlacePhoto[];
   types: string[];
+  place_id?: string;  // Add place_id for Google Maps links
 }
 
 interface PlacesListProps {

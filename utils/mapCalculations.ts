@@ -402,6 +402,7 @@ export const findNearbyPlaces = async (
             // Convert the results to our Place type
             const places: Place[] = results.map(result => ({
               id: result.place_id || `place-${Math.random()}`,
+              place_id: result.place_id, // Include place_id for Google Maps links
               name: result.name || 'Unnamed Place',
               vicinity: result.vicinity || '',
               rating: result.rating || 0,
