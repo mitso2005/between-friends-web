@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { GoogleMap, Marker, DirectionsRenderer } from '@react-google-maps/api';
-import { useMapContext } from '../contexts/MapContext';
+import { useMapContext } from '../contexts/OptimizedMapContext';
 import { PlacesPanel } from './PlacesPanel';
 import { useHoverState } from '../utils/useHoverState';
 import { AnimatedMarker } from './AnimatedMarker';

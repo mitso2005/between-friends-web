@@ -3,7 +3,7 @@ import { Place } from './PlacesList';
 import { useHoverState } from '../utils/useHoverState';
 import { RouteInfo } from './RouteInfo';
 import { TransportMode } from './TransportModeSelector';
-import { useMapContext } from '../contexts/MapContext';
+import { useMapContext } from '../contexts/OptimizedMapContext';
 
 interface PlacesPanelProps {
   places: Place[];

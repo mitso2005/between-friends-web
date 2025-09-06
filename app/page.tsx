@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { useJsApiLoader, Libraries } from "@react-google-maps/api";
-import { MapProvider } from "../contexts/MapContext";
+import { MapProvider } from '../contexts/OptimizedMapContext';
 import { MapView } from "../components/MapView";
 import { SearchPanel } from "../components/SearchPanel";
 

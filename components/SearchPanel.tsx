@@ -5,7 +5,7 @@ import { RouteInfo } from './RouteInfo';
 import { ApiKeyError, ErrorMessage } from './ErrorMessage';
 import { PlaceTypeSelector } from './PlaceTypeSelector';
 import { PlacesList } from './PlacesList';
-import { useMapContext } from '../contexts/MapContext';
+import { useMapContext } from '../contexts/OptimizedMapContext';
 
 export const SearchPanel: React.FC = () => {
   const {
