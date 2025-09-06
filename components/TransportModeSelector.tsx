@@ -25,7 +25,7 @@ export const TransportModeSelector: React.FC<TransportModeSelectorProps> = ({
           className={`flex-1 py-1.5 border rounded text-xs cursor-pointer flex items-center justify-center
             ${mode === "DRIVING" 
               ? "bg-accent text-white border-accent font-semibold" 
-              : "bg-transparent text-gray-700 border-gray-300 font-normal"}`}
+              : "bg-transparent text-gray-600 border-gray-300 font-normal"}`}
           aria-pressed={mode === "DRIVING"}
         >
           🚗 Driving
@@ -36,7 +36,7 @@ export const TransportModeSelector: React.FC<TransportModeSelectorProps> = ({
           className={`flex-1 py-1.5 border rounded text-xs cursor-pointer flex items-center justify-center
             ${mode === "TRANSIT" 
               ? "bg-accent text-white border-accent font-semibold" 
-              : "bg-transparent text-gray-700 border-gray-300 font-normal"}`}
+              : "bg-transparent text-gray-600 border-gray-300 font-normal"}`}
           aria-pressed={mode === "TRANSIT"}
         >
           🚌 Transit
@@ -47,7 +47,7 @@ export const TransportModeSelector: React.FC<TransportModeSelectorProps> = ({
           className={`flex-1 py-1.5 border rounded text-xs cursor-pointer flex items-center justify-center
             ${mode === "WALKING" 
               ? "bg-accent text-white border-accent font-semibold" 
-              : "bg-transparent text-gray-700 border-gray-300 font-normal"}`}
+              : "bg-transparent text-gray-600 border-gray-300 font-normal"}`}
           aria-pressed={mode === "WALKING"}
         >
           🚶 Walking

@@ -25,7 +25,7 @@ export const PlacesList: React.FC<PlacesListProps> = ({
 }) => {
   if (isLoading) {
     return (
-      <div className="mt-3 p-3 bg-white rounded text-center border border-gray-200">
+      <div className="mt-3 p-3 bg-white rounded text-center border border-gray-300">
         <div className="animate-pulse text-accent">Searching for places...</div>
       </div>
     );
@@ -33,7 +33,7 @@ export const PlacesList: React.FC<PlacesListProps> = ({
 
   if (places.length === 0) {
     return (
-      <div className="mt-3 p-3 bg-white rounded text-center border border-gray-200">
+      <div className="mt-3 p-3 bg-white rounded text-center border border-gray-300">
         No places found in this area. Try changing the place type or locations.
       </div>
     );

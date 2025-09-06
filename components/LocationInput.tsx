@@ -37,7 +37,7 @@ export const LocationInput: React.FC<LocationInputProps> = ({
           placeholder={placeholder}
           value={value}
           onChange={onChange}
-          className="p-2 text-base rounded border border-gray-300 w-full bg-white box-border"
+          className="p-2 text-base rounded border border-gray-500 w-full box-border"
           id={id}
         />
       </Autocomplete>

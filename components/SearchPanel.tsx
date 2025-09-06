@@ -39,7 +39,6 @@ export const SearchPanel: React.FC = () => {
     findRecommendedPlaces,
     selectPlace,
     selectedPlace,
-    // Removed timeFairnessPreference and setTimeFairnessPreference
   } = useMapContext();
 
   // Track if we're in recommendation mode
@@ -86,7 +85,7 @@ export const SearchPanel: React.FC = () => {
     <div
       className="absolute top-6 left-6 z-10 bg-white p-4 rounded-lg shadow-md flex flex-col gap-3 min-w-[300px] max-w-[400px]"
     >
-      <div className="text-xs text-gray-600 mb-2">
+      <div className="text-xs text-grey-800 mb-2">
         💡 Find the best meeting place between two locations
       </div>
       
@@ -206,7 +205,7 @@ export const SearchPanel: React.FC = () => {
       )}
 
       {mapBounds && (
-        <div className="text-[10px] text-gray-400 mt-2">
+        <div className="text-[10px] text-gray-600 mt-2">
           Searching in: {mapBounds.getSouthWest().lat().toFixed(3)}, {mapBounds.getSouthWest().lng().toFixed(3)} to {mapBounds.getNorthEast().lat().toFixed(3)}, {mapBounds.getNorthEast().lng().toFixed(3)}
         </div>
       )}

@@ -64,7 +64,6 @@ export const MapView: React.FC<MapViewProps> = ({ isLoaded }) => {
       zoom={coordsA || coordsB ? 12 : 10}
       options={{
         streetViewControl: false,
-        mapTypeControl: false,
         fullscreenControl: false,
         clickableIcons: false,
       }}
