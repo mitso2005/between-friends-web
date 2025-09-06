@@ -2,19 +2,47 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
-First, run the development server:
+### Set up your environment
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+1. **Set up your Google Maps API Key**:
+   - Create a Google Maps API key in the [Google Cloud Console](https://console.cloud.google.com/google/maps-apis/)
+   - Enable the following APIs:
+     - Maps JavaScript API
+     - Places API
+     - Directions API
+   - Create a `.env.local` file in the project root:
+   ```
+   NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_google_maps_api_key_here
+   ```
+
+2. **Install dependencies and run the development server**:
+   ```bash
+   npm install
+   npm run dev
+   # or
+   yarn install
+   yarn dev
+   ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+## Testing API Call Optimization
+
+To test the API call optimization and caching:
+
+1. Navigate to [http://localhost:3000/test-api-calls](http://localhost:3000/test-api-calls)
+2. Use the test buttons to make API requests and observe:
+   - Cache hit rate
+   - Number of actual API calls made
+   - Effectiveness of request batching
+
+## API Optimization
+
+The application uses several techniques to minimize Google Maps API calls:
+
+- In-memory caching with 5-minute TTL
+- Request batching and queuing
+- Adaptive bias correction for midpoint calculations
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 

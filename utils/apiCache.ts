@@ -2,6 +2,21 @@
  * Cache for Google Maps API results to minimize API calls
  */
 
+// Add Google Maps to window type for browser environments
+declare global {
+  interface Window {
+    google?: {
+      maps: any;
+    };
+  }
+}
+
+// Helper function to check if Google Maps is loaded
+const isGoogleMapsLoaded = (): boolean => {
+  if (typeof window === 'undefined') return false;
+  return !!(window.google && window.google.maps);
+};
+
 // Type for cache keys
 type CacheKey = string;
 
@@ -22,6 +37,26 @@ const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 // Initialize our caches
 const directionsCache: Cache<google.maps.DirectionsResult> = {};
 const placesCache: Cache<google.maps.places.PlaceResult[]> = {};
+
+// API call tracking
+export interface ApiCallStats {
+  totalDirectionsRequests: number;
+  cachedDirectionsHits: number;
+  actualDirectionsApiCalls: number;
+  totalPlacesRequests: number;
+  cachedPlacesHits: number;
+  actualPlacesApiCalls: number;
+}
+
+// Initialize tracking counters
+let apiCallStats: ApiCallStats = {
+  totalDirectionsRequests: 0,
+  cachedDirectionsHits: 0,
+  actualDirectionsApiCalls: 0,
+  totalPlacesRequests: 0,
+  cachedPlacesHits: 0,
+  actualPlacesApiCalls: 0
+};
 
 /**
  * Create a cache key for directions requests
@@ -59,9 +94,11 @@ const isCacheValid = <T>(cachedItem: CachedItem<T> | undefined): boolean => {
 export const getCachedDirections = (
   key: CacheKey
 ): google.maps.DirectionsResult | null => {
+  apiCallStats.totalDirectionsRequests++;
   const cached = directionsCache[key];
   if (isCacheValid(cached)) {
     console.log("🔄 Using cached directions");
+    apiCallStats.cachedDirectionsHits++;
     return cached.data;
   }
   return null;
@@ -83,9 +120,11 @@ export const cacheDirections = (
 export const getCachedPlaces = (
   key: CacheKey
 ): google.maps.places.PlaceResult[] | null => {
+  apiCallStats.totalPlacesRequests++;
   const cached = placesCache[key];
   if (isCacheValid(cached)) {
     console.log("🔄 Using cached places");
+    apiCallStats.cachedPlacesHits++;
     return cached.data;
   }
   return null;
@@ -109,6 +148,12 @@ export const cachedDirectionsService = {
     request: google.maps.DirectionsRequest,
     callback?: (result: google.maps.DirectionsResult | null, status: google.maps.DirectionsStatus) => void
   ): Promise<google.maps.DirectionsResult> => {
+    if (!isGoogleMapsLoaded()) {
+      const error = new Error("Google Maps API is not loaded yet");
+      if (callback) callback(null, "ERROR" as google.maps.DirectionsStatus);
+      throw error;
+    }
+    
     if (!request.origin || !request.destination || !request.travelMode) {
       throw new Error("Invalid directions request");
     }
@@ -136,6 +181,9 @@ export const cachedDirectionsService = {
     
     // Skip caching for string locations as we can't generate a reliable cache key
     if (typeof request.origin === 'string' || typeof request.destination === 'string') {
+      apiCallStats.totalDirectionsRequests++;
+      apiCallStats.actualDirectionsApiCalls++;
+      console.log("🌐 Making uncacheable directions API call (string locations)");
       const directionsService = new google.maps.DirectionsService();
       return new Promise((resolve, reject) => {
         directionsService.route(request, (result, status) => {
@@ -166,6 +214,8 @@ export const cachedDirectionsService = {
     
     // Make actual API call
     const directionsService = new google.maps.DirectionsService();
+    apiCallStats.actualDirectionsApiCalls++;
+    console.log("🌐 Making actual directions API call");
     return new Promise((resolve, reject) => {
       directionsService.route(request, (result, status) => {
         if (status === google.maps.DirectionsStatus.OK && result) {
@@ -190,6 +240,12 @@ export const cachedPlacesService = {
     request: google.maps.places.PlaceSearchRequest,
     callback?: (results: google.maps.places.PlaceResult[] | null, status: google.maps.places.PlacesServiceStatus) => void
   ): Promise<google.maps.places.PlaceResult[]> => {
+    if (!isGoogleMapsLoaded()) {
+      const error = new Error("Google Maps API is not loaded yet");
+      if (callback) callback(null, "ERROR" as google.maps.places.PlacesServiceStatus);
+      throw error;
+    }
+    
     if (!request.location || !request.type) {
       throw new Error("Invalid places request");
     }
@@ -222,6 +278,8 @@ export const cachedPlacesService = {
       document.createElement('div')
     );
     
+    apiCallStats.actualPlacesApiCalls++;
+    console.log("🌐 Making actual places API call");
     return new Promise((resolve, reject) => {
       placesService.nearbySearch(request, (results, status) => {
         if (status === google.maps.places.PlacesServiceStatus.OK && results) {
@@ -284,8 +342,43 @@ const processQueue = async () => {
 export const queueDirectionsRequest = (
   request: google.maps.DirectionsRequest
 ): Promise<google.maps.DirectionsResult> => {
+  if (!isGoogleMapsLoaded()) {
+    return Promise.reject(new Error("Google Maps API is not loaded yet"));
+  }
+  
   return new Promise((resolve, reject) => {
     requestQueue.push({ request, resolve, reject });
     processQueue();
   });
+};
+
+/**
+ * Get the current API call statistics
+ */
+export const getApiCallStats = (): ApiCallStats => {
+  // Check if we're running in browser and Google Maps is loaded
+  if (!isGoogleMapsLoaded()) {
+    throw new Error("Google Maps API is not loaded yet");
+  }
+  
+  return { ...apiCallStats };
+};
+
+/**
+ * Reset the API call counters
+ */
+export const resetApiCallStats = (): void => {
+  // Check if we're running in browser and Google Maps is loaded
+  if (!isGoogleMapsLoaded()) {
+    throw new Error("Google Maps API is not loaded yet");
+  }
+  
+  apiCallStats = {
+    totalDirectionsRequests: 0,
+    cachedDirectionsHits: 0,
+    actualDirectionsApiCalls: 0,
+    totalPlacesRequests: 0,
+    cachedPlacesHits: 0,
+    actualPlacesApiCalls: 0
+  };
 };
