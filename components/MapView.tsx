@@ -1,6 +1,7 @@
 import React from 'react';
 import { GoogleMap, Marker, DirectionsRenderer } from '@react-google-maps/api';
 import { useMapContext } from '../contexts/MapContext';
+import { PlacesPanel } from './PlacesPanel';
 
 // Using className instead of inline style
 const mapContainerClassName = "w-full h-svh";
@@ -31,7 +32,9 @@ export const MapView: React.FC<MapViewProps> = ({ isLoaded }) => {
     directionsB, 
     apiKeyError,
     recommendedPlaces,
-    selectedPlace
+    selectedPlace,
+    selectPlace,
+    isSearchingPlaces
   } = useMapContext();
   
   const onLoad = (mapInstance: google.maps.Map) => {
@@ -58,7 +61,8 @@ export const MapView: React.FC<MapViewProps> = ({ isLoaded }) => {
   if (!isLoaded) return <div className="text-center p-4 text-zinc-600 font-medium">Loading Maps...</div>;
   
   return (
-    <GoogleMap
+    <>
+      <GoogleMap
       mapContainerClassName={mapContainerClassName}
       center={coordsA || coordsB || defaultCenter}
       zoom={coordsA || coordsB ? 12 : 10}
@@ -66,6 +70,7 @@ export const MapView: React.FC<MapViewProps> = ({ isLoaded }) => {
         streetViewControl: false,
         fullscreenControl: false,
         clickableIcons: false,
+        mapTypeControl: false,
       }}
       onLoad={onLoad}
       onBoundsChanged={onBoundsChanged}
@@ -167,5 +172,16 @@ export const MapView: React.FC<MapViewProps> = ({ isLoaded }) => {
         />
       )}
     </GoogleMap>
+      
+      {/* Place the panel on the right side if we have places to show or are searching */}
+      {(recommendedPlaces.length > 0 || isSearchingPlaces) && (
+        <PlacesPanel
+          places={recommendedPlaces}
+          isLoading={isSearchingPlaces}
+          onPlaceSelect={selectPlace}
+          selectedPlace={selectedPlace}
+        />
+      )}
+    </>
   );
 };

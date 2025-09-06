@@ -68,3 +68,22 @@ input, textarea, select {
 .btn-primary:hover {
   opacity: 0.75;
 }
+
+/* Custom scrollbar for the places panel */
+.styled-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.styled-scrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.styled-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--accent-light);
+  border-radius: 3px;
+}
+
+.styled-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}

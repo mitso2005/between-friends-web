@@ -40,8 +40,6 @@ export const SearchPanel: React.FC = () => {
     selectedPlace,
   } = useMapContext();
 
-  // Track if we're in recommendation mode
-  const [showRecommendations, setShowRecommendations] = useState(false);
   const [noPlacesError, setNoPlacesError] = useState<string | null>(null);
   
   const handleInputAChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -77,13 +75,9 @@ export const SearchPanel: React.FC = () => {
     
     // Execute the entire flow in one call
     await calculateMeetingPoint((success: boolean) => {
-      if (success) {
-        // Only if places were found successfully
-        setShowRecommendations(true);
-      } else {
+      if (!success) {
         // If no places found, show an error
         setNoPlacesError("No places found in this area. Try changing the place type or locations.");
-        setShowRecommendations(false);
       }
     });
   };
@@ -130,7 +124,7 @@ export const SearchPanel: React.FC = () => {
         />
       )}
 
-      {coordsA && coordsB && !showRecommendations && (
+      {coordsA && coordsB && (
         <div className="mt-2">
           <PlaceTypeSelector 
             selectedType={selectedPlaceType}
@@ -141,26 +135,15 @@ export const SearchPanel: React.FC = () => {
 
       {apiKeyError && <ApiKeyError />}
       
-      {!showRecommendations ? (
-        <button
-          onClick={handleFindMeetingPoint}
-          disabled={!coordsA || !coordsB || isCalculating}
-          className={`mt-3 py-2.5 px-4 bg-accent text-white rounded font-semibold text-base flex items-center justify-center
-            ${coordsA && coordsB && !isCalculating ? 'cursor-pointer opacity-100' : 'cursor-not-allowed opacity-30'}
-            transition-opacity duration-200`}
-        >
-          {isCalculating || isSearchingPlaces ? "Finding Places..." : apiKeyError ? "Use Geographic Midpoint" : "Find Meeting Places"}
-        </button>
-      ) : (
-        <div className="flex gap-2 mt-3">
-          <button
-            onClick={() => setShowRecommendations(false)}
-            className="py-2.5 px-2.5 bg-transparent text-zinc-600 border border-zinc-300 rounded text-sm"
-          >
-            Back
-          </button>
-        </div>
-      )}
+      <button
+        onClick={handleFindMeetingPoint}
+        disabled={!coordsA || !coordsB || isCalculating}
+        className={`mt-3 py-2.5 px-4 bg-accent text-white rounded font-semibold text-base flex items-center justify-center
+          ${coordsA && coordsB && !isCalculating ? 'cursor-pointer opacity-100' : 'cursor-not-allowed opacity-30'}
+          transition-opacity duration-200`}
+      >
+        {isCalculating || isSearchingPlaces ? "Finding Places..." : apiKeyError ? "Use Geographic Midpoint" : "Find Meeting Places"}
+      </button>
       
       {calculationError && (
         <ErrorMessage message={calculationError} type="error" />
@@ -168,14 +151,6 @@ export const SearchPanel: React.FC = () => {
       
       {noPlacesError && (
         <ErrorMessage message={noPlacesError} type="warning" />
-      )}
-
-      {showRecommendations && (
-        <PlacesList
-          places={recommendedPlaces}
-          isLoading={isSearchingPlaces}
-          onPlaceSelect={selectPlace}
-        />
       )}
 
       {selectedPlace && (
