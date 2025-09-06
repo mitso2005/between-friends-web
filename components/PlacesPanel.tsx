@@ -83,7 +83,7 @@ export const PlacesPanel: React.FC<PlacesPanelProps> = ({
         <div className="flex justify-between items-center mb-6 pt-2">
           <button 
             onClick={clearSelectedPlace} 
-            className="text-zinc-700 hover:text-accent p-1 rounded-full hover:bg-accent-light"
+            className="text-zinc-700 hover:text-accent p-1 rounded-full hover:bg-accent-light transition-all duration-200 cursor-pointer hover:shadow-sm active:scale-95"
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
               <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
