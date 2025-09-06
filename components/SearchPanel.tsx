@@ -38,6 +38,7 @@ export const SearchPanel: React.FC = () => {
     findRecommendedPlaces,
     selectPlace,
     selectedPlace,
+    clearSearchResults,
   } = useMapContext();
 
   const [noPlacesError, setNoPlacesError] = useState<string | null>(null);
@@ -72,6 +73,9 @@ export const SearchPanel: React.FC = () => {
   const handleFindMeetingPoint = async () => {
     // Reset errors
     setNoPlacesError(null);
+    
+    // Clear any previous search results
+    clearSearchResults();
     
     // Execute the entire flow in one call
     await calculateMeetingPoint((success: boolean) => {

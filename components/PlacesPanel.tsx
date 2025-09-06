@@ -22,8 +22,8 @@ export const PlacesPanel: React.FC<PlacesPanelProps> = ({
     );
   }
 
-  if (places.length === 0) {
-    return null; // Don't show the panel at all if no places
+  if (places.length === 0 && !isLoading) {
+    return null; // Don't show the panel at all if no places and not loading
   }
 
   return (

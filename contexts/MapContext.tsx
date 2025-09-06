@@ -63,6 +63,7 @@ interface MapContextType {
   findRecommendedPlaces: (onComplete?: (success: boolean) => void) => Promise<void>;
   selectPlace: (place: Place) => Promise<void>;
   clearSelectedPlace: () => void;
+  clearSearchResults: () => void;
 }
 
 const MapContext = createContext<MapContextType | undefined>(undefined);
@@ -148,6 +149,9 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       if (onComplete) onComplete(false);
       return;
     }
+    
+    // Clear all previous search results before starting a new search
+    clearSearchResults();
     
     setIsCalculating(true);
     setCalculationError(null);
@@ -313,6 +317,18 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     // setDirectionsB(null);
   };
   
+  // Clear all search results
+  const clearSearchResults = () => {
+    setMidpoint(null);
+    setTimeMidpoint(null);
+    setDirectionsA(null);
+    setDirectionsB(null);
+    setRecommendedPlaces([]);
+    setSelectedPlace(null);
+    setCalculationError(null);
+    setApiKeyError(false);
+  };
+  
   // Context value
   const value: MapContextType = {
     map,
@@ -352,6 +368,7 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     findRecommendedPlaces,
     selectPlace,
     clearSelectedPlace,
+    clearSearchResults,
   };
   
   return <MapContext.Provider value={value}>{children}</MapContext.Provider>;
