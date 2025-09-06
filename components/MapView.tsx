@@ -31,7 +31,9 @@ export const MapView: React.FC<MapViewProps> = ({ isLoaded }) => {
     midpoint, 
     timeMidpoint, 
     directionsA, 
-    directionsB, 
+    directionsB,
+    transportModeA,
+    transportModeB,
     apiKeyError,
     recommendedPlaces,
     selectedPlace,
@@ -185,7 +187,7 @@ export const MapView: React.FC<MapViewProps> = ({ isLoaded }) => {
     </GoogleMap>
       
       {/* Place the panel on the right side if we have places to show or are searching */}
-      {(recommendedPlaces.length > 0 || isSearchingPlaces) && (
+      {(recommendedPlaces.length > 0 || isSearchingPlaces || selectedPlace) && (
         <PlacesPanel
           places={recommendedPlaces}
           isLoading={isSearchingPlaces}
@@ -193,6 +195,10 @@ export const MapView: React.FC<MapViewProps> = ({ isLoaded }) => {
           selectedPlace={selectedPlace}
           onPlaceHover={setHoveredPlaceId}
           hoveredPlaceId={hoveredPlaceId}
+          directionsA={directionsA || undefined}
+          directionsB={directionsB || undefined}
+          transportModeA={transportModeA}
+          transportModeB={transportModeB}
         />
       )}
     </>

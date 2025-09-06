@@ -157,33 +157,7 @@ export const SearchPanel: React.FC = () => {
         <ErrorMessage message={noPlacesError} type="warning" />
       )}
 
-      {selectedPlace && (
-        <div className="mt-3 p-2.5 bg-accent-light border border-accent rounded">
-          <div className="text-sm text-title font-semibold mb-1">
-            Selected Place: {selectedPlace.name}
-          </div>
-          <div className="text-xs mb-1">
-            {selectedPlace.vicinity}
-          </div>
-          <div className="flex items-center">
-            <span className="text-accent mr-1">★</span>
-            <span className="text-xs">{selectedPlace.rating}</span>
-            <span className="text-xs text-gray-600 ml-1">
-              ({selectedPlace.userRatingsTotal} reviews)
-            </span>
-          </div>
-        </div>
-      )}
-
-      {/* Display route info if available and place is selected */}
-      {directionsA && directionsB && selectedPlace && (
-        <RouteInfo 
-          directionsA={directionsA}
-          directionsB={directionsB}
-          transportModeA={transportModeA}
-          transportModeB={transportModeB}
-        />
-      )}
+      {/* Selected place information has been moved to the PlacesPanel */}
 
       {mapBounds && (
         <div className="text-[10px] text-gray-600 mt-2">
