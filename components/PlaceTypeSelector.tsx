@@ -14,7 +14,7 @@ export const PlaceTypeSelector: React.FC<PlaceTypeSelectorProps> = ({
   return (
     <div>
       <label className="text-sm font-medium text-title mb-1 block">
-        What would you like to find?
+        Where are we going?
       </label>
       <div className="flex gap-2">
         <button

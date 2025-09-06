@@ -110,7 +110,6 @@ export const SearchPanel: React.FC = () => {
         <TransportModeSelector 
           mode={transportModeA} 
           setMode={setTransportModeA} 
-          label="Transport mode from first location:"
         />
       )}
       
@@ -128,13 +127,11 @@ export const SearchPanel: React.FC = () => {
         <TransportModeSelector 
           mode={transportModeB} 
           setMode={setTransportModeB} 
-          label="Transport mode from second location:"
         />
       )}
 
       {coordsA && coordsB && !showRecommendations && (
         <div className="mt-2">
-          <div className="text-sm font-medium text-zinc-700 mb-1">What are you looking for?</div>
           <PlaceTypeSelector 
             selectedType={selectedPlaceType}
             onTypeChange={setSelectedPlaceType}

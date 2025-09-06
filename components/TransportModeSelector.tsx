@@ -5,19 +5,14 @@ export type TransportMode = "DRIVING" | "TRANSIT" | "WALKING";
 interface TransportModeSelectorProps { 
   mode: TransportMode; 
   setMode: (mode: TransportMode) => void;
-  label: string;
 }
 
 export const TransportModeSelector: React.FC<TransportModeSelectorProps> = ({ 
   mode, 
-  setMode, 
-  label 
+  setMode
 }) => {
   return (
     <div>
-      <label className="text-sm font-medium text-title mb-1 block">
-        {label}
-      </label>
       <div className="flex gap-2">
         <button
           type="button"
