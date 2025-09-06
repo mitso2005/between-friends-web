@@ -46,7 +46,7 @@ export const PlacesPanel: React.FC<PlacesPanelProps> = ({
             onMouseLeave={() => onPlaceHover(null)}
             className={`p-3 bg-white mb-3 rounded-md cursor-pointer border ${
               selectedPlace?.id === place.id 
-                ? 'border-accent bg-accent-light scale-105 shadow-md selected-place-card' 
+                ? 'border-accent bg-accent-light scale-105 shadow-md' 
                 : hoveredPlaceId === place.id
                   ? 'border-accent shadow-md translate-x-[-3px]' 
                   : 'border-zinc-100 hover:border-accent hover:shadow-md'
