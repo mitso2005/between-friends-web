@@ -115,19 +115,22 @@ export const MapView: React.FC<MapViewProps> = ({ isLoaded }) => {
       {/* Midpoint markers - completely hidden since we're auto-finding places */}
       {/* Midpoint markers are now completely hidden as we're automatically finding places */}
       
-      {/* Recommended place markers */}
-      {!selectedPlace && recommendedPlaces.map(place => (
-        <AnimatedMarker
-          key={place.id}
-          id={place.id}
-          position={place.location}
-          title={place.name}
-          onClick={() => selectPlace(place)}
-          onMouseOver={() => setHoveredPlaceId(place.id)}
-          onMouseOut={() => setHoveredPlaceId(null)}
-          isHovered={hoveredPlaceId === place.id}
-        />
-      ))}
+      {/* Recommended place markers - always shown, even when a place is selected */}
+      {recommendedPlaces.map(place => {
+        // Don't show AnimatedMarker for the selected place as we'll show a different marker for it
+        return selectedPlace?.id !== place.id ? (
+          <AnimatedMarker
+            key={place.id}
+            id={place.id}
+            position={place.location}
+            title={place.name}
+            onClick={() => selectPlace(place)}
+            onMouseOver={() => setHoveredPlaceId(place.id)}
+            onMouseOut={() => setHoveredPlaceId(null)}
+            isHovered={hoveredPlaceId === place.id}
+          />
+        ) : null;
+      })}
       
       {/* Selected place marker */}
       {selectedPlace && (
