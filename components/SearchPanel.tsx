@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { LocationInput } from './LocationInput';
 import { TransportModeSelector } from './TransportModeSelector';
-// Removed FairnessSelector import
 import { RouteInfo } from './RouteInfo';
 import { ApiKeyError, ErrorMessage } from './ErrorMessage';
 import { PlaceTypeSelector } from './PlaceTypeSelector';
@@ -43,6 +42,7 @@ export const SearchPanel: React.FC = () => {
 
   // Track if we're in recommendation mode
   const [showRecommendations, setShowRecommendations] = useState(false);
+  const [noPlacesError, setNoPlacesError] = useState<string | null>(null);
   
   const handleInputAChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLocationA(e.target.value);
@@ -70,15 +70,22 @@ export const SearchPanel: React.FC = () => {
     if (mapBounds) ac.setBounds(mapBounds);
   };
 
-  // Handle the find meeting point flow
+  // Handle the find meeting point and places flow combined
   const handleFindMeetingPoint = async () => {
-    await calculateMeetingPoint();
-    setShowRecommendations(true);
-  };
-
-  // Handle the find places flow
-  const handleFindPlaces = async () => {
-    await findRecommendedPlaces();
+    // Reset errors
+    setNoPlacesError(null);
+    
+    // Execute the entire flow in one call
+    await calculateMeetingPoint((success: boolean) => {
+      if (success) {
+        // Only if places were found successfully
+        setShowRecommendations(true);
+      } else {
+        // If no places found, show an error
+        setNoPlacesError("No places found in this area. Try changing the place type or locations.");
+        setShowRecommendations(false);
+      }
+    });
   };
   
   return (
@@ -126,10 +133,13 @@ export const SearchPanel: React.FC = () => {
       )}
 
       {coordsA && coordsB && !showRecommendations && (
-        <PlaceTypeSelector 
-          selectedType={selectedPlaceType}
-          onTypeChange={setSelectedPlaceType}
-        />
+        <div className="mt-2">
+          <div className="text-sm font-medium text-zinc-700 mb-1">What are you looking for?</div>
+          <PlaceTypeSelector 
+            selectedType={selectedPlaceType}
+            onTypeChange={setSelectedPlaceType}
+          />
+        </div>
       )}
 
       {apiKeyError && <ApiKeyError />}
@@ -142,22 +152,13 @@ export const SearchPanel: React.FC = () => {
             ${coordsA && coordsB && !isCalculating ? 'cursor-pointer opacity-100' : 'cursor-not-allowed opacity-30'}
             transition-opacity duration-200`}
         >
-          {isCalculating ? "Calculating..." : apiKeyError ? "Use Geographic Midpoint" : "Find Meeting Point"}
+          {isCalculating || isSearchingPlaces ? "Finding Places..." : apiKeyError ? "Use Geographic Midpoint" : "Find Meeting Places"}
         </button>
       ) : (
         <div className="flex gap-2 mt-3">
           <button
-            onClick={handleFindPlaces}
-            disabled={isSearchingPlaces}
-            className={`flex-1 py-2.5 px-4 bg-accent text-white border-none rounded font-semibold text-sm
-              ${isSearchingPlaces ? 'cursor-not-allowed opacity-30' : 'cursor-pointer opacity-100'}`}
-          >
-            {isSearchingPlaces ? "Searching..." : "Find Places"}
-          </button>
-          
-          <button
             onClick={() => setShowRecommendations(false)}
-            className="py-2.5 px-2.5 bg-transparent text-gray-600 border border-gray-300 rounded text-sm"
+            className="py-2.5 px-2.5 bg-transparent text-zinc-600 border border-zinc-300 rounded text-sm"
           >
             Back
           </button>
@@ -166,6 +167,10 @@ export const SearchPanel: React.FC = () => {
       
       {calculationError && (
         <ErrorMessage message={calculationError} type="error" />
+      )}
+      
+      {noPlacesError && (
+        <ErrorMessage message={noPlacesError} type="warning" />
       )}
 
       {showRecommendations && (

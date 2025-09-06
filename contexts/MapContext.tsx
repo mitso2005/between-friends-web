@@ -58,9 +58,9 @@ interface MapContextType {
   updateAutocompleteBias: (bounds: google.maps.LatLngBounds) => void;
   onPlaceChangedA: () => void;
   onPlaceChangedB: () => void;
-  calculateMeetingPoint: () => Promise<void>;
+  calculateMeetingPoint: (onComplete?: (success: boolean) => void) => Promise<void>;
   setSelectedPlaceType: (type: PlaceType) => void;
-  findRecommendedPlaces: () => Promise<void>;
+  findRecommendedPlaces: (onComplete?: (success: boolean) => void) => Promise<void>;
   selectPlace: (place: Place) => Promise<void>;
   clearSelectedPlace: () => void;
 }
@@ -143,19 +143,24 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
   };
   
-  const calculateMeetingPoint = async () => {
-    if (!coordsA || !coordsB) return;
+  const calculateMeetingPoint = async (onComplete?: (success: boolean) => void) => {
+    if (!coordsA || !coordsB) {
+      if (onComplete) onComplete(false);
+      return;
+    }
     
     setIsCalculating(true);
     setCalculationError(null);
     setApiKeyError(false);
     
-    // Calculate simple distance midpoint
-    const distanceMidpoint = calculateDistanceMidpoint(coordsA, coordsB);
-    setMidpoint(distanceMidpoint);
-    
     try {
-      // Remove fairness preference parameter
+      // Calculate simple distance midpoint - but don't show it to the user
+      const distanceMidpoint = calculateDistanceMidpoint(coordsA, coordsB);
+      
+      // Store the midpoint internally but don't display it
+      setMidpoint(null); // Don't show midpoint visually
+      
+      // Calculate time-based midpoint
       const result = await calculateTimeMidpoint(
         coordsA,
         coordsB,
@@ -163,37 +168,76 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         transportModeB
       );
       
+      // Store the results internally
       setTimeMidpoint(result.timeMidpoint);
       setDirectionsA(result.directionsA);
       setDirectionsB(result.directionsB);
       setApiKeyError(result.apiKeyError);
       setCalculationError(result.error);
       
-      // Adjust map viewport to show the routes if available
-      if (map && result.directionsA && result.directionsB) {
-        const bounds = new google.maps.LatLngBounds();
-        
-        result.directionsA.routes[0].overview_path.forEach((point) => bounds.extend(point));
-        result.directionsB.routes[0].overview_path.forEach((point) => bounds.extend(point));
-        
-        map.fitBounds(bounds, { 
-          top: 100, 
-          right: 50, 
-          bottom: 50, 
-          left: 350 
-        });
+      if (result.apiKeyError || result.error) {
+        if (onComplete) onComplete(false);
+        return;
       }
+      
+      // Proceed to finding places immediately
+      try {
+        setIsSearchingPlaces(true);
+        setRecommendedPlaces([]);
+        
+        // Determine search radius based on transport modes
+        const radius = getSearchRadius(transportModeA, transportModeB);
+        
+        // Find places using the time midpoint
+        const places = await findNearbyPlaces(result.timeMidpoint, selectedPlaceType, radius);
+        setRecommendedPlaces(places);
+        
+        // Adjust map viewport to show the places and routes
+        if (map && places.length > 0) {
+          const bounds = new google.maps.LatLngBounds();
+          
+          // Include the start/end locations
+          bounds.extend(coordsA);
+          bounds.extend(coordsB);
+          
+          // Include all the places found
+          places.forEach(place => bounds.extend(place.location));
+          
+          map.fitBounds(bounds, { 
+            top: 100, 
+            right: 50, 
+            bottom: 50, 
+            left: 350 
+          });
+        }
+        
+        // Report success/failure to the caller
+        if (onComplete) onComplete(places.length > 0);
+        
+      } catch (error) {
+        console.error("Error finding recommended places:", error);
+        if (onComplete) onComplete(false);
+      } finally {
+        setIsSearchingPlaces(false);
+      }
+      
     } catch (error) {
       console.error("Error in calculating meeting point:", error);
       setCalculationError("Failed to calculate meeting point.");
+      if (onComplete) onComplete(false);
     } finally {
       setIsCalculating(false);
     }
   };
   
   // Find recommended places near the midpoint
-  const findRecommendedPlaces = async () => {
-    if (!timeMidpoint) return;
+  // This function is now primarily used separately for finding different place types
+  // after the midpoint has already been calculated
+  const findRecommendedPlaces = async (onComplete?: (success: boolean) => void) => {
+    if (!timeMidpoint) {
+      if (onComplete) onComplete(false);
+      return;
+    }
     
     setIsSearchingPlaces(true);
     setRecommendedPlaces([]);
@@ -205,8 +249,11 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       // Find places
       const places = await findNearbyPlaces(timeMidpoint, selectedPlaceType, radius);
       setRecommendedPlaces(places);
+      
+      if (onComplete) onComplete(places.length > 0);
     } catch (error) {
       console.error("Error finding recommended places:", error);
+      if (onComplete) onComplete(false);
     } finally {
       setIsSearchingPlaces(false);
     }

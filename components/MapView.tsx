@@ -3,7 +3,7 @@ import { GoogleMap, Marker, DirectionsRenderer } from '@react-google-maps/api';
 import { useMapContext } from '../contexts/MapContext';
 
 // Using className instead of inline style
-const mapContainerClassName = "w-screen h-screen";
+const mapContainerClassName = "w-full h-svh";
 
 const defaultCenter = {
   lat: -37.8136,
@@ -55,7 +55,7 @@ export const MapView: React.FC<MapViewProps> = ({ isLoaded }) => {
     }
   };
   
-  if (!isLoaded) return <div className="text-center p-4">Loading Maps...</div>;
+  if (!isLoaded) return <div className="text-center p-4 text-zinc-600 font-medium">Loading Maps...</div>;
   
   return (
     <GoogleMap
@@ -76,6 +76,14 @@ export const MapView: React.FC<MapViewProps> = ({ isLoaded }) => {
           position={coordsA} 
           title={locationA}
           label={{ text: "A", color: "white" }}
+          icon={{
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 10,
+            fillColor: "#525252", // Tailwind zinc-600
+            fillOpacity: 1,
+            strokeColor: "#FFFFFF",
+            strokeWeight: 2,
+          }}
         />
       )}
       {coordsB && (
@@ -83,41 +91,19 @@ export const MapView: React.FC<MapViewProps> = ({ isLoaded }) => {
           position={coordsB} 
           title={locationB}
           label={{ text: "B", color: "white" }}
-        />
-      )}
-      
-      {/* Midpoint markers */}
-      {midpoint && !selectedPlace && (
-        <Marker 
-          position={midpoint}
-          title="Distance Midpoint"
-          label={{ text: "D", color: "white" }}
-          icon={{
-            path: google.maps.SymbolPath.CIRCLE,
-            scale: 6,
-            fillColor: "#FF8C00",
-            fillOpacity: 0.5,
-            strokeColor: "#FFFFFF",
-            strokeWeight: 1,
-          }}
-        />
-      )}
-      
-      {timeMidpoint && !selectedPlace && (
-        <Marker 
-          position={timeMidpoint}
-          title="Time Midpoint"
-          label={{ text: "M", color: "white" }}
           icon={{
             path: google.maps.SymbolPath.CIRCLE,
             scale: 10,
-            fillColor: "#FF8C00",
+            fillColor: "#525252", // Tailwind zinc-600
             fillOpacity: 1,
             strokeColor: "#FFFFFF",
             strokeWeight: 2,
           }}
         />
       )}
+      
+      {/* Midpoint markers - completely hidden since we're auto-finding places */}
+      {/* Midpoint markers are now completely hidden as we're automatically finding places */}
       
       {/* Recommended place markers */}
       {!selectedPlace && recommendedPlaces.map(place => (
@@ -128,7 +114,7 @@ export const MapView: React.FC<MapViewProps> = ({ isLoaded }) => {
           icon={{
             path: google.maps.SymbolPath.CIRCLE,
             scale: 8,
-            fillColor: "#4CAF50", // Green color for recommended places
+            fillColor: "#ea580c", // Tailwind orange-600
             fillOpacity: 0.8,
             strokeColor: "#FFFFFF",
             strokeWeight: 2,
@@ -144,7 +130,7 @@ export const MapView: React.FC<MapViewProps> = ({ isLoaded }) => {
           icon={{
             path: google.maps.SymbolPath.CIRCLE,
             scale: 12,
-            fillColor: "#4CAF50", // Green color for the selected place
+            fillColor: "#ea580c", // Tailwind orange-600
             fillOpacity: 1,
             strokeColor: "#FFFFFF",
             strokeWeight: 2,
@@ -158,7 +144,7 @@ export const MapView: React.FC<MapViewProps> = ({ isLoaded }) => {
           directions={directionsA}
           options={{
             polylineOptions: {
-              strokeColor: "#1976D2",
+              strokeColor: "#ea580c", // Tailwind orange-600
               strokeWeight: 5,
               strokeOpacity: 0.8,
             },
@@ -172,7 +158,7 @@ export const MapView: React.FC<MapViewProps> = ({ isLoaded }) => {
           directions={directionsB}
           options={{
             polylineOptions: {
-              strokeColor: "#D32F2F",
+              strokeColor: "#2563eb", // Tailwind blue-600 (correct case for v4)
               strokeWeight: 5,
               strokeOpacity: 0.8,
             },
