@@ -4,8 +4,8 @@
   --background: #ffffff;
   --title-text: #2d2d2d;  /* Charcoal black for titles */
   --foreground: #5a5a5a;  /* Grey for normal text */
-  --accent: #ff8c00;      /* Orange accent color */
-  --accent-light: #ffdab3; /* Light orange for subtle accents */
+  --accent: #fb923c;      /* Tailwind orange-400 */
+  --accent-light: #fed7aa; /* Tailwind orange-200 for subtle accents */
   --input-text: #2d2d2d;
   --input-background: #ffffff;
   --input-border: #cccccc;

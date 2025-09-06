@@ -146,7 +146,7 @@ export const MapView: React.FC<MapViewProps> = ({ isLoaded }) => {
             // Use a custom path to create a map pin shape for selected places
             path: 'M 12,2 C 8.1340068,2 5,5.1340068 5,9 c 0,5.25 7,13 7,13 0,0 7,-7.75 7,-13 0,-3.8659932 -3.134007,-7 -7,-7 z',
             anchor: new google.maps.Point(12, 22),
-            fillColor: "#ea580c", // Tailwind orange-600
+            fillColor: "#fb923c", // Tailwind orange-400
             fillOpacity: 1,
             strokeColor: "#FFFFFF",
             strokeWeight: 2,
@@ -162,7 +162,7 @@ export const MapView: React.FC<MapViewProps> = ({ isLoaded }) => {
           directions={directionsA}
           options={{
             polylineOptions: {
-              strokeColor: "#ea580c", // Tailwind orange-600
+              strokeColor: "#fb923c", // Tailwind orange-400
               strokeWeight: 5,
               strokeOpacity: 0.8,
             },

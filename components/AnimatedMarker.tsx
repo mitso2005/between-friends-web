@@ -82,7 +82,7 @@ export const AnimatedMarker: React.FC<AnimatedMarkerProps> = ({
       icon={{
         path: google.maps.SymbolPath.CIRCLE,
         scale: scale,
-        fillColor: "#ea580c", // Tailwind orange-600
+        fillColor: "#fb923c", // Tailwind orange-400
         fillOpacity: opacity,
         strokeColor: "#FFFFFF",
         strokeWeight: isHovered ? 3 : 2,
