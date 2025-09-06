@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { GoogleMap, Marker, DirectionsRenderer } from '@react-google-maps/api';
 import { useMapContext } from '../contexts/MapContext';
 import { PlacesPanel } from './PlacesPanel';
+import { useHoverState } from '../utils/useHoverState';
+import { AnimatedMarker } from './AnimatedMarker';
 
 // Using className instead of inline style
 const mapContainerClassName = "w-full h-svh";
@@ -36,6 +38,9 @@ export const MapView: React.FC<MapViewProps> = ({ isLoaded }) => {
     selectPlace,
     isSearchingPlaces
   } = useMapContext();
+  
+  // Track which place is being hovered
+  const [hoveredPlaceId, setHoveredPlaceId] = useState<string | null>(null);
   
   const onLoad = (mapInstance: google.maps.Map) => {
     setMap(mapInstance);
@@ -112,18 +117,15 @@ export const MapView: React.FC<MapViewProps> = ({ isLoaded }) => {
       
       {/* Recommended place markers */}
       {!selectedPlace && recommendedPlaces.map(place => (
-        <Marker
+        <AnimatedMarker
           key={place.id}
+          id={place.id}
           position={place.location}
           title={place.name}
-          icon={{
-            path: google.maps.SymbolPath.CIRCLE,
-            scale: 8,
-            fillColor: "#ea580c", // Tailwind orange-600
-            fillOpacity: 0.8,
-            strokeColor: "#FFFFFF",
-            strokeWeight: 2,
-          }}
+          onClick={() => selectPlace(place)}
+          onMouseOver={() => setHoveredPlaceId(place.id)}
+          onMouseOut={() => setHoveredPlaceId(null)}
+          isHovered={hoveredPlaceId === place.id}
         />
       ))}
       
@@ -132,13 +134,19 @@ export const MapView: React.FC<MapViewProps> = ({ isLoaded }) => {
         <Marker 
           position={selectedPlace.location}
           title={selectedPlace.name}
+          cursor="pointer"
+          // Only bounce briefly when first selected
+          animation={google.maps.Animation.DROP}
           icon={{
-            path: google.maps.SymbolPath.CIRCLE,
-            scale: 12,
+            // Use a custom path to create a map pin shape for selected places
+            path: 'M 12,2 C 8.1340068,2 5,5.1340068 5,9 c 0,5.25 7,13 7,13 0,0 7,-7.75 7,-13 0,-3.8659932 -3.134007,-7 -7,-7 z',
+            anchor: new google.maps.Point(12, 22),
             fillColor: "#ea580c", // Tailwind orange-600
             fillOpacity: 1,
             strokeColor: "#FFFFFF",
             strokeWeight: 2,
+            scale: 1.5,
+            labelOrigin: new google.maps.Point(12, 9)
           }}
         />
       )}
@@ -180,6 +188,8 @@ export const MapView: React.FC<MapViewProps> = ({ isLoaded }) => {
           isLoading={isSearchingPlaces}
           onPlaceSelect={selectPlace}
           selectedPlace={selectedPlace}
+          onPlaceHover={setHoveredPlaceId}
+          hoveredPlaceId={hoveredPlaceId}
         />
       )}
     </>

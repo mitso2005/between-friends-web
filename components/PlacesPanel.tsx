@@ -1,18 +1,23 @@
 import React from 'react';
 import { Place } from './PlacesList';
+import { useHoverState } from '../utils/useHoverState';
 
 interface PlacesPanelProps {
   places: Place[];
   isLoading: boolean;
   onPlaceSelect: (place: Place) => void;
   selectedPlace: Place | null;
+  onPlaceHover?: (placeId: string | null) => void;
+  hoveredPlaceId?: string | null;
 }
 
 export const PlacesPanel: React.FC<PlacesPanelProps> = ({
   places,
   isLoading,
   onPlaceSelect,
-  selectedPlace
+  selectedPlace,
+  onPlaceHover = () => {},
+  hoveredPlaceId = null
 }) => {
   if (isLoading) {
     return (
@@ -37,10 +42,14 @@ export const PlacesPanel: React.FC<PlacesPanelProps> = ({
           <div 
             key={place.id}
             onClick={() => onPlaceSelect(place)}
+            onMouseEnter={() => onPlaceHover(place.id)}
+            onMouseLeave={() => onPlaceHover(null)}
             className={`p-3 bg-white mb-3 rounded-md cursor-pointer border ${
               selectedPlace?.id === place.id 
-                ? 'border-accent bg-accent-light' 
-                : 'border-zinc-100 hover:border-accent hover:shadow-md'
+                ? 'border-accent bg-accent-light scale-105 shadow-md selected-place-card' 
+                : hoveredPlaceId === place.id
+                  ? 'border-accent shadow-md translate-x-[-3px]' 
+                  : 'border-zinc-100 hover:border-accent hover:shadow-md'
             } transition-all duration-200`}
           >
             <div className="font-semibold text-title">{place.name}</div>
