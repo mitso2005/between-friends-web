@@ -31,6 +31,15 @@ export const PlacesPanel: React.FC<PlacesPanelProps> = ({
   transportModeB = 'DRIVING'
 }) => {
   const { clearSelectedPlace } = useMapContext();
+  // All hooks at the top level of the component
+  const [currentPhotoIndex, setCurrentPhotoIndex] = React.useState(0);
+  
+  // Reset photo index when selected place changes
+  React.useEffect(() => {
+    if (selectedPlace) {
+      setCurrentPhotoIndex(0);
+    }
+  }, [selectedPlace]);
   
   // Helper function to safely compare IDs
   const isSelected = (place: Place) => selectedPlace?.id === place.id;
@@ -48,7 +57,6 @@ export const PlacesPanel: React.FC<PlacesPanelProps> = ({
 
   // If a place is selected, show its details
   if (selectedPlace) {
-    const [currentPhotoIndex, setCurrentPhotoIndex] = React.useState(0);
     const totalPhotos = selectedPlace.photos?.length || 0;
     
     // Functions to navigate through photos
