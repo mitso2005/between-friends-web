@@ -167,6 +167,15 @@ export const calculateTimeMidpoint = async (
         error: "Your Google Maps API key is not authorized for the Directions Service. Using geographic midpoint instead.",
         apiKeyError: true
       };
+    } else if (error === "ZERO_RESULTS") {
+      // Handle the case where there is no transit route available
+      return {
+        timeMidpoint: distanceMidpoint,
+        directionsA: null,
+        directionsB: null,
+        error: "No transit routes found between these locations. Using geographic midpoint instead.",
+        apiKeyError: false
+      };
     } else {
       return {
         timeMidpoint: distanceMidpoint,
@@ -198,7 +207,7 @@ export const getSearchRadius = (
   // Scenario 3: One user is walking, the other is driving
   if ((transportModeA === 'WALKING' && transportModeB === 'DRIVING') ||
       (transportModeA === 'DRIVING' && transportModeB === 'WALKING')) {
-    return 1000; // 1 kilometer around the walker
+    return 1500; // 1.5 kilometers around the walker
   }
   
   // Scenario 4: One user is using public transport, the other is driving
