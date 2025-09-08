@@ -201,7 +201,7 @@ export const getSearchRadius = (
   // Scenario 2: Both users are walking or using public transport
   if ((transportModeA === 'WALKING' || transportModeA === 'TRANSIT') &&
       (transportModeB === 'WALKING' || transportModeB === 'TRANSIT')) {
-    return 500; // 500 meters
+    return 1000; // 1 kilometer
   }
   
   // Scenario 3: One user is walking, the other is driving
