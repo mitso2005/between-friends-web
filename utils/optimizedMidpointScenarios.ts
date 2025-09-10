@@ -48,17 +48,15 @@ export const calculateSameModeMidpoint = async (
         provideRouteAlternatives: false,
       }
     );
-  
+
     // Get total travel time in seconds
     const totalTravelTime = directRoute.routes[0].legs[0].duration?.value || 0;
-    
     // Calculate halfway time
     const halfwayTime = totalTravelTime / 2;
-    
+
     // Extract the route polyline and build a map of points with their time from start
     const routePoints: RoutePoint[] = [];
     let cumulativeTime = 0;
-    
     // Process each step in the route
     const steps = directRoute.routes[0].legs[0].steps;
     for (const step of steps) {
@@ -67,33 +65,25 @@ export const calculateSameModeMidpoint = async (
         lat: step.start_location.lat(),
         lng: step.start_location.lng()
       };
-      
-      // Add start point with its time from route start
       routePoints.push({
         point: startPoint,
         timeFromStart: cumulativeTime
       });
-      
       // Get end point of this step
       const endPoint = {
         lat: step.end_location.lat(),
         lng: step.end_location.lng()
       };
-      
-      // Add step duration to our cumulative time
       cumulativeTime += step.duration?.value || 0;
-      
-      // Add end point with its time from route start
       routePoints.push({
         point: endPoint,
         timeFromStart: cumulativeTime
       });
     }
-    
+
     // Find the two points that surround our halfway time
     let beforePoint: RoutePoint | null = null;
     let afterPoint: RoutePoint | null = null;
-    
     for (let i = 0; i < routePoints.length - 1; i++) {
       if (routePoints[i].timeFromStart <= halfwayTime && 
           routePoints[i + 1].timeFromStart >= halfwayTime) {
@@ -102,22 +92,42 @@ export const calculateSameModeMidpoint = async (
         break;
       }
     }
-    
     // If we didn't find surrounding points, use the first/last points as fallback
     if (!beforePoint || !afterPoint) {
       return { midpoint: fallbackMidpoint, directionsA: null, directionsB: null };
     }
-    
+
     // Interpolate to find the exact halfway point
     const segmentDuration = afterPoint.timeFromStart - beforePoint.timeFromStart;
     const segmentProgress = segmentDuration === 0 ? 0 : 
       (halfwayTime - beforePoint.timeFromStart) / segmentDuration;
-    
-    const midpoint = {
+    let midpoint = {
       lat: beforePoint.point.lat + segmentProgress * (afterPoint.point.lat - beforePoint.point.lat),
       lng: beforePoint.point.lng + segmentProgress * (afterPoint.point.lng - beforePoint.point.lng)
     };
-    
+
+    // If transit mode, snap midpoint to closest shared transit stop
+    if (transportMode === 'TRANSIT') {
+      // Extract all transit stops from the route
+      const stops = extractTransitStops(directRoute);
+      // Find the closest stop to the calculated midpoint
+      let closestStop = stops[0];
+      let minDist = Infinity;
+      for (const stop of stops) {
+        const dLat = stop.location.lat - midpoint.lat;
+        const dLng = stop.location.lng - midpoint.lng;
+        const dist = Math.sqrt(dLat * dLat + dLng * dLng) * 111139; // meters
+        if (dist < minDist) {
+          minDist = dist;
+          closestStop = stop;
+        }
+      }
+      // Snap midpoint to closest stop if within 1km, otherwise keep original midpoint
+      if (closestStop && minDist < 1000) {
+        midpoint = closestStop.location;
+      }
+    }
+
     try {
       // Calculate routes from both origins to this midpoint in parallel
       const [directionsA, directionsB] = await Promise.all([
@@ -132,7 +142,6 @@ export const calculateSameModeMidpoint = async (
           travelMode: transportMode as google.maps.TravelMode,
         })
       ]);
-      
       return { midpoint, directionsA, directionsB };
     } catch (error) {
       console.log("Error calculating routes to midpoint:", error);
