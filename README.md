@@ -6,6 +6,8 @@ A smart web application that helps people find optimal meeting places between di
 
 ## Table of Contents
 
+- [Bugs and Fixes](#bugs-and-fixes)
+- [Roadmap](#roadmap)
 - [Features](#features)
 - [Technical Overview](#technical-overview)
 - [Architecture](#architecture)
@@ -20,6 +22,23 @@ A smart web application that helps people find optimal meeting places between di
 - [Future Enhancements](#future-enhancements)
 - [Contributing](#contributing)
 - [License](#license)
+
+## Bugs and Fixes
+
+Midpoint Logic:
+ - Transit/Transit not working correctly, South Yarra - Frankston returns no results, need to clock to shared station or pick midpoint between closest stations
+ - Revise car/transit logic to allow for more flexible routing options. Transit options that move in the direction of the driver should be prioritised, then drivers can meet transit users at a stop along their route.
+
+## Roadmap
+1. Fix midpoint logic bugs, case where users don't share a stop
+2. Need to allow up to two routes for car/car transit midpoints
+3. Link up Supabase backend for user accounts and saving preferences/history
+4. Add ability to save favorite locations and meeting spots
+5. **LAUNCH VERSION 1.0**
+6. Add stripe payments for premium features
+7. Add ability to share meeting spots via link or social media
+8. Add ability to set a time for the meeting and factor in transit schedules
+9. Add cycling and rideshare transport modes
 
 ## Features
 

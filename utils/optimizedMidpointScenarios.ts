@@ -1,5 +1,10 @@
 /**
  * Optimized midpoint scenario functions that use caching and batching to minimize API calls
+ * 
+ * Improvemenets to make:
+ * Transit/Transit not working correctly, South Yarra - Frankston returns no results, need to clock to shared station or pick midpoint between closest stations
+ * Need to allow up to twos routes for car/car transit midpoints
+ * 
  */
 
 import { TransportMode } from "../components/TransportModeSelector";
